@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="browse_title">逛</string>
+    <string name="browse_placeholder">逛模块已接入独立返回栈，可在此承载分类、搜索与内容流。</string>
+</resources>

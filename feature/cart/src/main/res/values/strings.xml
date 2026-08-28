@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="cart_title">购物车</string>
+    <string name="cart_select_all">全选</string>
+    <string name="cart_total">合计</string>
+    <string name="cart_checkout">去结算(%1$d)</string>
+    <string name="cart_empty">购物车还是空的</string>
+    <string name="cart_error_load">加载失败，请稍后重试</string>
+    <string name="cart_retry">重试</string>
+    <string name="cart_loading">正在加载购物车</string>
+    <string name="cart_article_subtitle">%1$s · %2$s · %3$s</string>
+</resources>

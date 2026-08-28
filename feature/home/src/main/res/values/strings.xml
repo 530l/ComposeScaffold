@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="home_title">首页</string>
+    <string name="home_placeholder">首页模块已接入独立返回栈，可在此组合推荐、活动与业务入口。</string>
+</resources>

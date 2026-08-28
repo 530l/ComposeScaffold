@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="login_title">登录</string>
+    <string name="login_description">登录模块和 Navigation 3 入口已独立，认证接口请接入真实服务后实现。</string>
+    <string name="login_back">返回</string>
+</resources>
