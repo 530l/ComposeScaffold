@@ -20,7 +20,7 @@ class StartupBaselineProfileGenerator {
             pressHome()
             startActivityAndWait()
             device.waitForIdle()
-            // 简单走查五个 tab，覆盖主导航路径
+            // 走查三个代表性 tab（首页/发现/购物车），覆盖主导航路径
             device.findObject(By.text("发现"))?.click()
             device.waitForIdle()
             device.findObject(By.text("购物车"))?.click()

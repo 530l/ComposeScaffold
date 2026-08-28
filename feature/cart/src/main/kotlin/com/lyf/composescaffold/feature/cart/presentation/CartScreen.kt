@@ -43,11 +43,11 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.lyf.composescaffold.core.data.util.formatMoney
 import com.lyf.composescaffold.core.design.AppTheme
-import com.lyf.composescaffold.core.ui.event.ObserveAsEvents
-import com.lyf.composescaffold.core.ui.loadmore.LoadableLazyColumn
-import com.lyf.composescaffold.core.ui.loadmore.LoadMoreState
-import com.lyf.composescaffold.core.ui.state.LoadableErrorBanner
-import com.lyf.composescaffold.core.ui.state.LoadableStateContent
+import com.lyf.composescaffold.core.design.ui.event.ObserveAsEvents
+import com.lyf.composescaffold.core.design.ui.loadmore.LoadableLazyColumn
+import com.lyf.composescaffold.core.design.ui.loadmore.LoadMoreState
+import com.lyf.composescaffold.core.design.ui.state.LoadableErrorBanner
+import com.lyf.composescaffold.core.design.ui.state.LoadableStateContent
 import com.lyf.composescaffold.feature.cart.R
 import com.lyf.composescaffold.feature.cart.domain.Article
 
@@ -287,6 +287,7 @@ private fun SettleBar(
     }
 }
 
+/** 演示用缩略图调色板：接入真实设计系统时应替换为 theme 扩展并适配深色模式。*/
 private val thumbnailColors = listOf(
     Color(0xFFF7E8D3),
     Color(0xFFE2EFFA),

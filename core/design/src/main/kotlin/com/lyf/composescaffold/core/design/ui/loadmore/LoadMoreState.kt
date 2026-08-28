@@ -1,4 +1,4 @@
-package com.lyf.composescaffold.core.ui.loadmore
+package com.lyf.composescaffold.core.design.ui.loadmore
 
 /**
  * 加载更多的 UI 状态。刷新/初始化的失败不进这里，

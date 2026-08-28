@@ -31,7 +31,7 @@ compileSdk 37 / targetSdk 37 / minSdk 24；JVM 工具链：Gradle daemon JDK 22�
 
 ```text
 app                         应用壳：五 Tab 壳、根导航、初始化、DI/Room 数据库聚合、发布配置
-  ├── core:common           纯 Kotlin 底座：日志（AppLogger）、运行配置（AppConfig），零 Compose 依赖
+  ├── core:common           基础层（Android library、零 UI 依赖）：日志（AppLogger）、运行配置（AppConfig）
   ├── core:data             通用模型（Money/NetworkResult）、Retrofit/OkHttp 工厂、
   │                         KeyValueStore 接口与 MMKV 实现、核心 DI 模块
   ├── core:design           Compose 工具箱：主题、图片（AppImage/Coil）、刷新/加载更多组件族

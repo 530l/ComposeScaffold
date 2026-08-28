@@ -1,4 +1,4 @@
-package com.lyf.composescaffold.core.ui.state
+package com.lyf.composescaffold.core.design.ui.state
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box

@@ -14,7 +14,7 @@ import java.io.IOException
 private const val REQUEST_TIMEOUT_MILLIS = 30_000L
 private const val CONNECT_TIMEOUT_MILLIS = 15_000L
 private const val MAX_RETRIES = 2
-private const val MAX_RETRY_DELAY_MILLIS = 2_000L
+private const val MAX_RETRY_DELAY_MILLIS = 1_000L
 
 private val IDEMPOTENT_METHODS = setOf("GET", "HEAD", "OPTIONS")
 
@@ -71,9 +71,11 @@ private class RetryInterceptor : Interceptor {
         var lastException: IOException? = null
         while (attempt <= MAX_RETRIES) {
             if (attempt > 0) {
-                // 指数退避：1s、2s…，上限 MAX_RETRY_DELAY_MILLIS
+                // 指数退避 500ms/1s（上限 MAX_RETRY_DELAY_MILLIS）。
+                // 注意：sleep 占用的是 OkHttp dispatcher 线程，退避越长越占并发能力，
+                // 刻意保持短退避以降低与外层超时叠加时的最坏挂起时长。
                 val delayMillis = minOf(
-                    1_000L shl (attempt - 1),
+                    500L shl (attempt - 1),
                     MAX_RETRY_DELAY_MILLIS,
                 )
                 try {

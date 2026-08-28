@@ -1,4 +1,4 @@
-package com.lyf.composescaffold.core.ui.event
+package com.lyf.composescaffold.core.design.ui.event
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect

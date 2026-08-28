@@ -1,4 +1,4 @@
-package com.lyf.composescaffold.core.ui.loadmore
+package com.lyf.composescaffold.core.design.ui.loadmore
 
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineScope

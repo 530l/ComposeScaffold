@@ -1,4 +1,4 @@
-package com.lyf.composescaffold.core.ui.loadmore
+package com.lyf.composescaffold.core.design.ui.loadmore
 
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.grid.LazyGridState

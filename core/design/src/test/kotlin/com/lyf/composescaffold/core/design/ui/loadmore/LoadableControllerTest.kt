@@ -1,4 +1,4 @@
-package com.lyf.composescaffold.core.ui.loadmore
+package com.lyf.composescaffold.core.design.ui.loadmore
 
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.CompletableDeferred

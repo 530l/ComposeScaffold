@@ -1,4 +1,4 @@
-package com.lyf.composescaffold.core.ui.loadmore
+package com.lyf.composescaffold.core.design.ui.loadmore
 
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues

@@ -1,42 +1,42 @@
-package com.lyf.composescaffold.core.image
+package com.lyf.composescaffold.core.design.image
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
-import androidx.compose.runtime.DisposableEffect
-import androidx.compose.runtime.remember
 import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.ContentScale
 import coil3.ImageLoader
 import coil3.annotation.ExperimentalCoilApi
 import coil3.compose.AsyncImage
-import coil3.compose.LocalPlatformContext
 import coil3.network.okhttp.OkHttpNetworkFetcherFactory
+import com.lyf.composescaffold.core.common.log.AppLogger
 import okhttp3.OkHttpClient
 
 private val LocalAppImageLoader = staticCompositionLocalOf<ImageLoader> {
     error("AppImage 必须位于 ProvideAppImageLoader 内")
 }
 
+/**
+ * 进程级图片加载器工厂：由组合根（:app 的 Hilt 模块）以 @Singleton 提供，
+ * 复用网络栈共享的 OkHttpClient 连接池；OkHttpClient 不越过此函数向上层暴露。
+ */
 @OptIn(ExperimentalCoilApi::class)
+fun createAppImageLoader(
+    platformContext: coil3.PlatformContext,
+    okHttpClient: OkHttpClient,
+): ImageLoader = ImageLoader.Builder(platformContext)
+    .components {
+        add(OkHttpNetworkFetcherFactory(callFactory = { okHttpClient }))
+    }
+    .build()
+
+/** 挂载应用级 [ImageLoader]（由 Hilt 提供的进程单例），生命周期随进程，不随组合销毁。 */
 @Composable
 fun ProvideAppImageLoader(
-    okHttpClient: OkHttpClient = OkHttpClient(),
+    imageLoader: ImageLoader,
     content: @Composable () -> Unit,
 ) {
-    val platformContext = LocalPlatformContext.current
-    val imageLoader = remember(platformContext, okHttpClient) {
-        ImageLoader.Builder(platformContext)
-            .components {
-                add(OkHttpNetworkFetcherFactory(callFactory = { okHttpClient }))
-            }
-            .build()
-    }
-
-    DisposableEffect(imageLoader) {
-        onDispose(imageLoader::shutdown)
-    }
-
+    // 提示阅读者：loader 是进程单例，这里刻意不做 DisposableEffect shutdown。
     CompositionLocalProvider(LocalAppImageLoader provides imageLoader, content = content)
 }
 
@@ -48,8 +48,13 @@ fun AppImage(
     modifier: Modifier = Modifier,
     contentScale: ContentScale = ContentScale.Crop,
 ) {
+    val model = imageUrl?.takeIf { it.startsWith("http") }
+    if (imageUrl != null && model == null) {
+        // 拒绝非 http(s) 协议的图片地址：记录而非静默丢弃，避免线上疑难空白图。
+        AppLogger.debug("AppImage") { "忽略非 http(s) 图片地址: $imageUrl" }
+    }
     AsyncImage(
-        model = imageUrl?.takeIf { it.startsWith("https://") },
+        model = model,
         contentDescription = contentDescription,
         imageLoader = LocalAppImageLoader.current,
         modifier = modifier,

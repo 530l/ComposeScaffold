@@ -4,10 +4,10 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.lyf.composescaffold.core.common.log.AppLogger
 import com.lyf.composescaffold.core.data.model.Money
-import com.lyf.composescaffold.core.ui.loadmore.LoadableController
-import com.lyf.composescaffold.core.ui.loadmore.LoadableUiState
-import com.lyf.composescaffold.core.ui.loadmore.LoadMoreState
-import com.lyf.composescaffold.core.ui.loadmore.Page
+import com.lyf.composescaffold.core.design.ui.loadmore.LoadableController
+import com.lyf.composescaffold.core.design.ui.loadmore.LoadableUiState
+import com.lyf.composescaffold.core.design.ui.loadmore.LoadMoreState
+import com.lyf.composescaffold.core.design.ui.loadmore.Page
 import com.lyf.composescaffold.feature.cart.domain.Article
 import com.lyf.composescaffold.feature.cart.domain.ArticlePage
 import com.lyf.composescaffold.feature.cart.domain.ArticleRepository
@@ -22,7 +22,7 @@ import kotlinx.coroutines.flow.receiveAsFlow
  * 演示价规则：列表第 position 条（0 基）定价 (position + 1) 分，
  * 底栏合计为已选条目的位置累加。仅用于脚手架演示金额链路，无业务含义。
  */
-fun demoUnitPrice(position: Int): Money = Money((position + 1).toLong())
+internal fun demoUnitPrice(position: Int): Money = Money((position + 1).toLong())
 
 data class CartItemUiState(
     val article: Article,

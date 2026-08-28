@@ -19,10 +19,10 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.clearAndSetSemantics
 import androidx.navigation3.runtime.NavKey
 import com.lyf.composescaffold.R
-import com.lyf.composescaffold.core.navigation.AppNavHost
-import com.lyf.composescaffold.core.navigation.TabAppNavHost
-import com.lyf.composescaffold.core.navigation.TabNavigator
-import com.lyf.composescaffold.core.navigation.rememberTabNavigator
+import com.lyf.composescaffold.core.design.navigation.AppNavHost
+import com.lyf.composescaffold.core.design.navigation.TabAppNavHost
+import com.lyf.composescaffold.core.design.navigation.TabNavigator
+import com.lyf.composescaffold.core.design.navigation.rememberTabNavigator
 import com.lyf.composescaffold.feature.browse.navigation.browseEntryProvider
 import com.lyf.composescaffold.feature.browse.navigation.browseNavigationSerializers
 import com.lyf.composescaffold.feature.cart.navigation.cartEntryProvider

@@ -1,4 +1,4 @@
-package com.lyf.composescaffold.core.navigation
+package com.lyf.composescaffold.core.design.navigation
 
 import androidx.compose.animation.AnimatedContentTransitionScope
 import androidx.compose.animation.ContentTransform
@@ -14,7 +14,7 @@ import androidx.navigationevent.NavigationEvent
 private const val NAVIGATION_TRANSITION_DURATION_MS = 500
 private val NavigationTransitionEasing = CubicBezierEasing(0.2833f, 0.99f, 0.31833f, 0.99f)
 
-/** iOS 风格的水平推入动画。 */
+/** 平台统一的水平推入动画（CMP 姐妹项目同款节奏）。 */
 @OptIn(ExperimentalAnimationApi::class)
 internal fun <T : Any> AnimatedContentTransitionScope<Scene<T>>.forwardContentTransform():
     ContentTransform = ContentTransform(
@@ -40,7 +40,7 @@ internal fun <T : Any> AnimatedContentTransitionScope<Scene<T>>.forwardContentTr
     ),
 )
 
-/** iOS 风格的水平返回动画。 */
+/** 平台统一的水平返回动画（CMP 姐妹项目同款节奏）。 */
 @OptIn(ExperimentalAnimationApi::class)
 internal fun <T : Any> AnimatedContentTransitionScope<Scene<T>>.popContentTransform():
     ContentTransform = ContentTransform(

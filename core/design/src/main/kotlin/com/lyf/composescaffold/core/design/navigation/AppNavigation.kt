@@ -1,4 +1,4 @@
-package com.lyf.composescaffold.core.navigation
+package com.lyf.composescaffold.core.design.navigation
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember

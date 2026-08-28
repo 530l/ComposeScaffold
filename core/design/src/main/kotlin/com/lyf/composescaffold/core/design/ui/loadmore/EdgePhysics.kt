@@ -1,4 +1,4 @@
-package com.lyf.composescaffold.core.ui.loadmore
+package com.lyf.composescaffold.core.design.ui.loadmore
 
 /**
  * 底部橡胶带阻尼数学。纯函数、无 Compose 依赖，便于单测。
