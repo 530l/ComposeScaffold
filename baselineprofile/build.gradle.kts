@@ -21,7 +21,7 @@ android {
     }
 }
 
-// 连接模拟器运行 `./gradlew :app:generateBaselineProfile` 生成启动性能配置文件
+// 当前仅保留生成器源码；恢复 baselineprofile 插件后才会出现对应生成任务。
 dependencies {
     implementation(libs.androidx.benchmark.macro.junit4)
     implementation(libs.androidx.test.uiautomator)

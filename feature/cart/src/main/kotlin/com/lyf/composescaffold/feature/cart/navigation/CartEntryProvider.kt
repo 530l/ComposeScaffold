@@ -11,7 +11,7 @@ import kotlinx.serialization.modules.subclass
 /** 购物车模块拥有自己的路由集合，其他 Feature 不直接引用其页面实现。 */
 @Serializable
 sealed interface CartRoute : NavKey {
-    // Nav3 用 key.toString() 作 contentKey（saveable 状态与 entry 级 ViewModelStore 的存取键），
+    // 导航宿主统一用 key.toString() 作 contentKey（saveable 状态与 ViewModelStore 的存取键），
     // data object 默认 toString 只有 "Main"，跨 feature 会互相覆盖/误删，必须限定名。
     @Serializable
     data object Main : CartRoute {

@@ -185,7 +185,11 @@ fun TabAppNavHost(
             // 推入页：整页不透明，覆盖底栏
             Modifier.fillMaxSize()
         }
-        NavEntry(navEntry = entry) {
+        NavEntry(
+            key = key,
+            contentKey = key.toString(),
+            metadata = entry.metadata,
+        ) {
             Box(
                 modifier = pageModifier.background(pageBackground),
             ) {
@@ -219,16 +223,18 @@ fun TabAppNavHost(
         }
     }
     val activeEntries = decoratedEntries[navigator.currentTabIndex]
-    val tabRootContentKeys = remember(navigator.tabs) { navigator.tabs.map { it.toString() }.toSet() }
+    val tabRootContentKeys: Set<Any> = remember(navigator.tabs) {
+        navigator.tabs.mapTo(mutableSetOf()) { it.toString() }
+    }
     NavDisplay(
         entries = activeEntries,
         modifier = modifier,
         onBack = { navigator.navigateBack() },
         transitionSpec = {
             val fromRoot = initialState.entries.lastOrNull()?.contentKey
-                ?.let { it.toString() in tabRootContentKeys } == true
+                ?.let { it in tabRootContentKeys } == true
             val toRoot = targetState.entries.lastOrNull()?.contentKey
-                ?.let { it.toString() in tabRootContentKeys } == true
+                ?.let { it in tabRootContentKeys } == true
             if (fromRoot && toRoot) {
                 // 顶层 Tab 之间是直接切换，不属于页面导航，不播放转场动画。
                 EnterTransition.None togetherWith ExitTransition.None

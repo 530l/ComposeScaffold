@@ -4,29 +4,18 @@ import android.content.Context
 import com.tencent.mmkv.MMKV
 
 /**
- * MMKV 初始化：必须先于一切 KV 读写，由 Application.onCreate 最先调用。
- * 根目录默认 $(FilesDir)/mmkv；日志级别压到 Warning，避免 Info 噪声进入 release。
- */
-object StorageInitializer {
-    fun init(context: Context) {
-        MMKV.initialize(context, com.tencent.mmkv.MMKVLogLevel.LevelWarning)
-    }
-}
-
-/**
  * [KeyValueStore] 的 MMKV 实现。
  *
  * - 使用具名实例（mmapID）而非 defaultMMKV()，与库内其他默认存储隔离；
- * - 必须在 [StorageInitializer.init] 完成后才能构造（由启动链路保证：
- *   Application.onCreate 先初始化，早于任何 Hilt 解析）；
+ * - 首次由 Hilt 惰性构造时才初始化 MMKV，不为未使用的存储增加冷启动开销；
  * - MMKV 自身线程安全，实例可在多协程间共享（Hilt 单例）；
- * - 需要加密时走 MMKVConfig 的 cryptKey（密钥须来自平台安全存储，勿硬编码），
- *   届时在 DataModule 中集中调整，业务仍只依赖接口。
+ * - 本实现不加密，只允许存储非敏感数据，凭证必须使用 Android Keystore 独立实现。
  */
 class MmkvKeyValueStore(
+    context: Context,
     mmapID: String = DEFAULT_MMAP_ID,
 ) : KeyValueStore {
-    private val mmkv: MMKV = MMKV.mmkvWithID(mmapID)
+    private val mmkv: MMKV = initialize(context, mmapID)
 
     override fun putString(key: String, value: String): Boolean = mmkv.encode(key, value)
 
@@ -66,5 +55,13 @@ class MmkvKeyValueStore(
 
     private companion object {
         const val DEFAULT_MMAP_ID = "compose_scaffold_common"
+
+        fun initialize(context: Context, mmapID: String): MMKV {
+            MMKV.initialize(
+                context.applicationContext,
+                com.tencent.mmkv.MMKVLogLevel.LevelWarning,
+            )
+            return MMKV.mmkvWithID(mmapID)
+        }
     }
 }

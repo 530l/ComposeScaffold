@@ -23,7 +23,7 @@ import com.lyf.composescaffold.feature.mine.R
 /** 脚手架占位 tab：验证多 tab 导航骨架，实际项目在此替换为个人中心实现。 */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun MineScreen(modifier: Modifier = Modifier) {
+internal fun MineScreen(modifier: Modifier = Modifier) {
     Scaffold(
         modifier = modifier.fillMaxSize(),
         containerColor = MaterialTheme.colorScheme.background,

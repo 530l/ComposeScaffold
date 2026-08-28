@@ -1,5 +1,8 @@
 package com.lyf.composescaffold.core.common.config
 
+import java.net.URI
+import java.net.URISyntaxException
+
 enum class AppEnvironment {
     DEVELOPMENT,
     STAGING,
@@ -18,7 +21,21 @@ data class AppConfig(
     val enableNetworkLogging: Boolean = false,
 ) {
     init {
-        require(apiBaseUrl.startsWith("https://")) { "apiBaseUrl 必须使用 HTTPS" }
-        require(apiBaseUrl.endsWith('/')) { "apiBaseUrl 必须以 / 结尾" }
+        validateApiBaseUrl(apiBaseUrl)
     }
+}
+
+private fun validateApiBaseUrl(value: String) {
+    val uri = try {
+        URI(value)
+    } catch (error: URISyntaxException) {
+        throw IllegalArgumentException("apiBaseUrl 不是合法 URL", error)
+    }
+    require(uri.scheme.equals("https", ignoreCase = true)) { "apiBaseUrl 必须使用 HTTPS" }
+    require(!uri.host.isNullOrBlank()) { "apiBaseUrl 必须包含合法主机名" }
+    require(uri.rawUserInfo == null) { "apiBaseUrl 禁止包含用户名或密码" }
+    require(uri.rawQuery == null && uri.rawFragment == null) {
+        "apiBaseUrl 禁止包含 query 或 fragment"
+    }
+    require(uri.rawPath.orEmpty().endsWith('/')) { "apiBaseUrl 必须以 / 结尾" }
 }

@@ -9,8 +9,12 @@ package com.lyf.composescaffold.core.data.storage
  *
  * key 约定：各业务模块用常量对象集中声明，避免裸字符串散落在调用点：
  * ```
- * object LoginKeys { const val TOKEN = "login_token" }
+ * object DisplayKeys { const val DARK_MODE = "display_dark_mode" }
  * ```
+ *
+ * 本接口默认实现是未加密 MMKV，只能存放偏好设置、缓存标记等非敏感数据。
+ * token、密码、支付凭证和个人敏感信息必须使用基于 Android Keystore 的独立凭证存储，
+ * 禁止为了方便直接写入本接口。
  *
  * 实现约定：线程安全；put 返回 false 表示写入被拒（磁盘满等罕见场景）。
  */
@@ -43,7 +47,7 @@ interface KeyValueStore {
 
     /**
      * 立即落盘。MMKV 写的是 mmap 内存映射文件，崩溃场景下本身已近似持久；
-     * 只在对丢失零容忍的节点（如支付凭证写入后）调用，无需常规调用。
+     * 只在对非敏感状态丢失零容忍的节点调用，无需常规调用。
      */
     fun sync()
 }

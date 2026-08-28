@@ -6,6 +6,7 @@ import androidx.compose.ui.Modifier
 import androidx.lifecycle.viewmodel.navigation3.rememberViewModelStoreNavEntryDecorator
 import androidx.navigation3.runtime.EntryProviderScope
 import androidx.navigation3.runtime.NavBackStack
+import androidx.navigation3.runtime.NavEntry
 import androidx.navigation3.runtime.NavKey
 import androidx.navigation3.runtime.entryProvider as navigationEntryProvider
 import androidx.navigation3.runtime.rememberNavBackStack
@@ -56,6 +57,9 @@ fun AppNavHost(
     }
     val backStack = rememberNavBackStack(savedStateConfiguration, startDestination)
     val navigator = remember(backStack) { AppNavigator(backStack) }
+    val baseProvider = navigationEntryProvider {
+        entryProvider(navigator)
+    }
 
     NavDisplay(
         backStack = backStack,
@@ -68,8 +72,16 @@ fun AppNavHost(
             rememberSaveableStateHolderNavEntryDecorator(),
             rememberViewModelStoreNavEntryDecorator(),
         ),
-        entryProvider = navigationEntryProvider {
-            entryProvider(navigator)
+        entryProvider = { key ->
+            val entry = baseProvider(key)
+            // Navigation 3 默认 contentKey 的实现可能随版本变化，应用统一使用稳定路由名。
+            NavEntry(
+                key = key,
+                contentKey = key.toString(),
+                metadata = entry.metadata,
+            ) {
+                entry.Content()
+            }
         },
     )
 }

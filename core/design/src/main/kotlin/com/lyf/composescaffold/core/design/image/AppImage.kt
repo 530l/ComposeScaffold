@@ -10,6 +10,7 @@ import coil3.annotation.ExperimentalCoilApi
 import coil3.compose.AsyncImage
 import coil3.network.okhttp.OkHttpNetworkFetcherFactory
 import com.lyf.composescaffold.core.common.log.AppLogger
+import okhttp3.HttpUrl.Companion.toHttpUrlOrNull
 import okhttp3.OkHttpClient
 
 private val LocalAppImageLoader = staticCompositionLocalOf<ImageLoader> {
@@ -48,10 +49,13 @@ fun AppImage(
     modifier: Modifier = Modifier,
     contentScale: ContentScale = ContentScale.Crop,
 ) {
-    val model = imageUrl?.takeIf { it.startsWith("http") }
+    val model = imageUrl
+        ?.toHttpUrlOrNull()
+        ?.takeIf { url -> url.isHttps }
+        ?.toString()
     if (imageUrl != null && model == null) {
-        // 拒绝非 http(s) 协议的图片地址：记录而非静默丢弃，避免线上疑难空白图。
-        AppLogger.debug("AppImage") { "忽略非 http(s) 图片地址: $imageUrl" }
+        // 地址可能携带签名参数，只记录拒绝事实，不输出原始值。
+        AppLogger.debug("AppImage") { "忽略无效或非 HTTPS 图片地址" }
     }
     AsyncImage(
         model = model,

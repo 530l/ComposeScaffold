@@ -15,7 +15,7 @@ import javax.inject.Singleton
 import kotlinx.serialization.SerializationException
 
 @Singleton
-class DefaultArticleRepository @Inject constructor(
+internal class DefaultArticleRepository @Inject constructor(
     private val api: ArticleListApi,
 ) : ArticleRepository {
     override suspend fun loadPage(page: Int): Result<ArticlePage> {
@@ -23,8 +23,8 @@ class DefaultArticleRepository @Inject constructor(
         return safeRequest {
             api.getArticleList(page - FIRST_PAGE)
         }.unwrapWanApiResponse()
+            .mapArticlePage()
             .toResult()
-            .mapCatching(WanArticleListDto::toPage)
     }
 }
 
@@ -48,6 +48,17 @@ private fun <T : Any> NetworkResult<WanApiResponse<T>>.unwrapWanApiResponse(): N
 
                 else -> NetworkResult.Success(data, statusCode)
             }
+        }
+    }
+
+/** DTO 映射异常属于载荷问题；只捕获 Exception，不吞掉 OOM 等 JVM 致命错误。 */
+private fun NetworkResult<WanArticleListDto>.mapArticlePage(): NetworkResult<ArticlePage> =
+    when (this) {
+        is NetworkResult.Failure -> this
+        is NetworkResult.Success -> try {
+            NetworkResult.Success(value.toPage(), statusCode)
+        } catch (error: Exception) {
+            NetworkResult.Failure(NetworkError.InvalidPayload(error))
         }
     }
 

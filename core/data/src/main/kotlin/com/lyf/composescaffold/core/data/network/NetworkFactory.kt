@@ -3,50 +3,53 @@ package com.lyf.composescaffold.core.data.network
 import com.lyf.composescaffold.core.common.config.AppConfig
 import com.lyf.composescaffold.core.common.log.AppLogger
 import kotlinx.serialization.json.Json
-import okhttp3.Interceptor
 import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.OkHttpClient
-import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Retrofit
 import retrofit2.converter.kotlinx.serialization.asConverterFactory
 import java.io.IOException
+import java.util.concurrent.TimeUnit
 
 private const val REQUEST_TIMEOUT_MILLIS = 30_000L
 private const val CONNECT_TIMEOUT_MILLIS = 15_000L
-private const val MAX_RETRIES = 2
-private const val MAX_RETRY_DELAY_MILLIS = 1_000L
 
-private val IDEMPOTENT_METHODS = setOf("GET", "HEAD", "OPTIONS")
-
-fun createJson(): Json = Json {
+internal fun createJson(): Json = Json {
     ignoreUnknownKeys = true
     explicitNulls = false
     encodeDefaults = true
 }
 
-fun createOkHttpClient(config: AppConfig): OkHttpClient = OkHttpClient.Builder()
-    .connectTimeout(CONNECT_TIMEOUT_MILLIS, java.util.concurrent.TimeUnit.MILLISECONDS)
-    .readTimeout(REQUEST_TIMEOUT_MILLIS, java.util.concurrent.TimeUnit.MILLISECONDS)
-    .writeTimeout(REQUEST_TIMEOUT_MILLIS, java.util.concurrent.TimeUnit.MILLISECONDS)
-    .addInterceptor(RetryInterceptor())
+internal fun createOkHttpClient(config: AppConfig): OkHttpClient = OkHttpClient.Builder()
+    .connectTimeout(CONNECT_TIMEOUT_MILLIS, TimeUnit.MILLISECONDS)
+    .readTimeout(REQUEST_TIMEOUT_MILLIS, TimeUnit.MILLISECONDS)
+    .writeTimeout(REQUEST_TIMEOUT_MILLIS, TimeUnit.MILLISECONDS)
+    // 只保留 OkHttp 对连接失败的内建恢复；HTTP 状态码重试应由具体接口按幂等性决定。
+    .retryOnConnectionFailure(true)
     .apply {
         if (config.enableNetworkLogging) {
-            // 商业项目默认不打印正文，避免 token、手机号等敏感信息进入日志。
-            addInterceptor(
-                HttpLoggingInterceptor { message ->
-                    AppLogger.debug("HttpClient") { message }
-                }.apply {
-                    level = HttpLoggingInterceptor.Level.HEADERS
-                    redactHeader("Authorization")
-                    redactHeader("Cookie")
-                    redactHeader("Set-Cookie")
-                },
-            )
+            addInterceptor { chain ->
+                val request = chain.request()
+                val startedAt = System.nanoTime()
+                try {
+                    val response = chain.proceed(request)
+                    val durationMillis = (System.nanoTime() - startedAt) / 1_000_000
+                    // 不记录 URL、header 与 body，避免账号、token 等敏感数据落入日志。
+                    AppLogger.debug("HttpClient") {
+                        "${request.method} -> ${response.code} (${durationMillis}ms)"
+                    }
+                    response
+                } catch (error: IOException) {
+                    AppLogger.warning("HttpClient") {
+                        "${request.method} -> ${error::class.simpleName}"
+                    }
+                    throw error
+                }
+            }
         }
     }
     .build()
 
-fun createRetrofit(
+internal fun createRetrofit(
     config: AppConfig,
     okHttpClient: OkHttpClient,
     json: Json,
@@ -55,51 +58,3 @@ fun createRetrofit(
     .client(okHttpClient)
     .addConverterFactory(json.asConverterFactory("application/json".toMediaType()))
     .build()
-
-/**
- * 幂等重试拦截器：仅对 GET/HEAD/OPTIONS，在 5xx 响应或传输层异常时重试，
- * 指数退避、最多 [MAX_RETRIES] 次；反序列化、参数和业务异常重试不会产生不同结果。
- */
-private class RetryInterceptor : Interceptor {
-    override fun intercept(chain: Interceptor.Chain): okhttp3.Response {
-        val request = chain.request()
-        if (request.method !in IDEMPOTENT_METHODS) {
-            return chain.proceed(request)
-        }
-
-        var attempt = 0
-        var lastException: IOException? = null
-        while (attempt <= MAX_RETRIES) {
-            if (attempt > 0) {
-                // 指数退避 500ms/1s（上限 MAX_RETRY_DELAY_MILLIS）。
-                // 注意：sleep 占用的是 OkHttp dispatcher 线程，退避越长越占并发能力，
-                // 刻意保持短退避以降低与外层超时叠加时的最坏挂起时长。
-                val delayMillis = minOf(
-                    500L shl (attempt - 1),
-                    MAX_RETRY_DELAY_MILLIS,
-                )
-                try {
-                    Thread.sleep(delayMillis)
-                } catch (interrupted: InterruptedException) {
-                    Thread.currentThread().interrupt()
-                    throw IOException("重试等待被中断", interrupted)
-                }
-            }
-            val response = try {
-                chain.proceed(request)
-            } catch (error: IOException) {
-                lastException = error
-                attempt++
-                continue
-            }
-            // 5xx 才值得重试；成功与其他错误码直接返回。
-            if (response.code in 500..599 && attempt < MAX_RETRIES) {
-                response.close()
-                attempt++
-                continue
-            }
-            return response
-        }
-        throw lastException ?: IOException("请求重试耗尽")
-    }
-}

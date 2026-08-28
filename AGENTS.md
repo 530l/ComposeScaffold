@@ -52,7 +52,7 @@
 - 键值存储只注入 `core:data/storage/KeyValueStore` 接口，key 用业务模块的常量对象集中声明，
   不在调用点写裸字符串；MMKV 是 Android native 实现，JVM 单测跑不了真实现，测试用内存 Fake。
 - Nav3 路由 `data object` 必须覆写 `toString()` 返回 `接口名.对象名`（如 `"CartRoute.Main"`）：
-  Nav3 用 `key.toString()` 作 contentKey，是 saveable 状态（含滚动位置）与 entry 级
+  导航宿主显式用 `key.toString()` 作 contentKey，是 saveable 状态（含滚动位置）与 entry 级
   ViewModelStore 的存取键；裸 `data object Main` 跨 feature 全叫 "Main"，会互相覆盖、
   弹出时互相误删（症状：返回/切 tab 后列表回顶部）。
 - 多返回栈 tab 必须走 `core:design` 的 `TabAppNavHost`：每个 tab 的栈各自调用

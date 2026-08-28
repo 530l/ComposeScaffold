@@ -5,6 +5,8 @@ import kotlinx.serialization.SerializationException
 import retrofit2.Response
 import java.io.IOException
 
+private const val MAX_ERROR_SNIPPET_BYTES = 2_048L
+
 sealed interface NetworkResult<out T> {
     data class Success<T>(val value: T, val statusCode: Int) : NetworkResult<T>
     data class Failure(val error: NetworkError) : NetworkResult<Nothing>
@@ -38,10 +40,7 @@ suspend fun <T : Any> safeRequest(
         NetworkResult.Failure(
             NetworkError.Http(
                 statusCode = response.code(),
-                responseSnippet = response.errorBody()
-                    ?.string()
-                    ?.take(2_048)
-                    ?.ifBlank { null },
+                responseSnippet = response.errorBody()?.readBoundedSnippet(),
             ),
         )
     }
@@ -51,7 +50,7 @@ suspend fun <T : Any> safeRequest(
     NetworkResult.Failure(NetworkError.InvalidPayload(error))
 } catch (error: IOException) {
     NetworkResult.Failure(NetworkError.Connectivity(error))
-} catch (error: Throwable) {
+} catch (error: Exception) {
     NetworkResult.Failure(NetworkError.Unknown(error))
 }
 
@@ -75,4 +74,16 @@ private fun NetworkError.causeOrNull(): Throwable? = when (this) {
     is NetworkError.Connectivity -> cause
     is NetworkError.InvalidPayload -> cause
     is NetworkError.Unknown -> cause
+}
+
+/** 只读取错误正文开头，避免异常服务端响应导致整段正文进入内存。 */
+private fun okhttp3.ResponseBody.readBoundedSnippet(): String? = try {
+    use { body ->
+        val source = body.source()
+        source.request(MAX_ERROR_SNIPPET_BYTES)
+        val byteCount = minOf(source.buffer.size, MAX_ERROR_SNIPPET_BYTES)
+        source.buffer.clone().readUtf8(byteCount).ifBlank { null }
+    }
+} catch (_: IOException) {
+    null
 }

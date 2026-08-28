@@ -1,6 +1,5 @@
 plugins {
     alias(libs.plugins.android.library)
-    alias(libs.plugins.kotlin.serialization)
     alias(libs.plugins.ksp)
     alias(libs.plugins.hilt)
     alias(libs.plugins.detekt)
@@ -23,14 +22,13 @@ android {
 dependencies {
 
     detektPlugins(libs.detekt.formatting)
-    api(project(":core:common"))
+    implementation(project(":core:common"))
 
     implementation(libs.kotlinx.coroutines.core)
     implementation(libs.kotlinx.serialization.json)
     implementation(libs.retrofit)
     implementation(libs.retrofit.kotlinx.serialization)
     implementation(libs.okhttp)
-    implementation(libs.okhttp.logging.interceptor)
     implementation(libs.mmkv)
     implementation(libs.hilt.android)
     ksp(libs.hilt.compiler)

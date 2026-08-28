@@ -11,7 +11,7 @@ import kotlinx.serialization.modules.subclass
 /** 我的模块只暴露路由和 EntryProvider，不向其他 Feature 暴露页面拼装细节。 */
 @Serializable
 sealed interface MineRoute : NavKey {
-    // Nav3 用 key.toString() 作 contentKey（saveable 状态与 entry 级 ViewModelStore 的存取键），
+    // 导航宿主统一用 key.toString() 作 contentKey（saveable 状态与 ViewModelStore 的存取键），
     // data object 默认 toString 只有 "Main"，跨 feature 会互相覆盖/误删，必须限定名。
     @Serializable
     data object Main : MineRoute {

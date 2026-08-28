@@ -96,7 +96,7 @@ class LoadableController<T, S : LoadableUiState<T, S>>(
                     local()
                 } catch (error: CancellationException) {
                     throw error
-                } catch (error: Throwable) {
+                } catch (error: Exception) {
                     emptyList()
                 }
                 if (items.isNotEmpty()) {
@@ -191,7 +191,7 @@ class LoadableController<T, S : LoadableUiState<T, S>>(
         loadPage(page)
     } catch (error: CancellationException) {
         throw error
-    } catch (error: Throwable) {
+    } catch (error: Exception) {
         Result.failure(error)
     }
 

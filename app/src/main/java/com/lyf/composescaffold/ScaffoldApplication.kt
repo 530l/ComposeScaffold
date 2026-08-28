@@ -1,14 +1,27 @@
 package com.lyf.composescaffold
 
 import android.app.Application
-import com.lyf.composescaffold.core.data.storage.StorageInitializer
+import android.os.StrictMode
 import dagger.hilt.android.HiltAndroidApp
 
 @HiltAndroidApp
 class ScaffoldApplication : Application() {
     override fun onCreate() {
         super.onCreate()
-        // MMKV 必须先于一切 KV 读写初始化，早于任何 Hilt 惰性解析。
-        StorageInitializer.init(this)
+        if (BuildConfig.DEBUG) {
+            // 开发期尽早暴露主线程磁盘/网络访问与资源泄漏，release 不承担检测开销。
+            StrictMode.setThreadPolicy(
+                StrictMode.ThreadPolicy.Builder()
+                    .detectAll()
+                    .penaltyLog()
+                    .build(),
+            )
+            StrictMode.setVmPolicy(
+                StrictMode.VmPolicy.Builder()
+                    .detectAll()
+                    .penaltyLog()
+                    .build(),
+            )
+        }
     }
 }

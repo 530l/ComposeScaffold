@@ -20,7 +20,7 @@ import com.lyf.composescaffold.feature.message.R
 /** 消息占位骨架：页面自行处理顶部安全区，背景可以延伸到状态栏后方。 */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun MessageScreen(modifier: Modifier = Modifier) {
+internal fun MessageScreen(modifier: Modifier = Modifier) {
     Scaffold(
         modifier = modifier.fillMaxSize(),
         containerColor = MaterialTheme.colorScheme.background,

@@ -43,7 +43,8 @@ android {
         releaseKeyAlias,
         releaseKeyPassword,
     )
-    // 全有或全无：部分提供即配置期失败；全部缺省回落 debug 签名（本地 R8 验证/CI 可用）。
+    // 全有或全无：部分提供即配置期失败；全部缺省时 release 保持未签名，
+    // 供本地 R8 验证。
     val hasAllSigningProps = releaseSigningProps.all { it.isPresent }
     if (hasAllSigningProps) {
         signingConfigs {
@@ -60,7 +61,7 @@ android {
                 "COMPOSE_SCAFFOLD_STORE_FILE/STORE_PASSWORD/KEY_ALIAS/KEY_PASSWORD",
         )
     } else {
-        logger.lifecycle("未配置 release 签名，release 构建将使用 debug 签名（仅供本地验证）")
+        logger.lifecycle("未配置 release 签名，release 构建将保持未签名（仅供本地验证）")
     }
 
     buildTypes {
@@ -75,10 +76,6 @@ android {
             optimization {
                 enable = true
             }
-            proguardFiles(
-                getDefaultProguardFile("proguard-android-optimize.txt"),
-                "proguard-rules.pro",
-            )
             if (hasAllSigningProps) {
                 signingConfig = signingConfigs.getByName("release")
             }
@@ -118,13 +115,10 @@ dependencies {
     implementation(libs.androidx.activity.compose)
     implementation(platform(libs.androidx.compose.bom))
     implementation(libs.androidx.compose.ui)
-    implementation(libs.androidx.compose.ui.graphics)
-    implementation(libs.androidx.compose.ui.tooling.preview)
     implementation(libs.androidx.compose.material3)
-    implementation(libs.androidx.lifecycle.runtime.compose)
-    implementation(libs.androidx.lifecycle.viewmodel.compose)
     implementation(libs.androidx.navigation3.ui)
     implementation(libs.androidx.compose.material.icons.core)
+    implementation(libs.kotlinx.serialization.core)
     implementation(libs.okhttp)
     implementation(libs.coil.compose)
     debugImplementation(libs.androidx.compose.ui.tooling)
@@ -133,7 +127,6 @@ dependencies {
     ksp(libs.hilt.compiler)
 
     implementation(libs.room.runtime)
-    implementation(libs.room.ktx)
     ksp(libs.room.compiler)
 
     implementation(libs.androidx.profileinstaller)

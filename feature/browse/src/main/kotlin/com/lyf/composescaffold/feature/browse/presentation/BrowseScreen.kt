@@ -20,7 +20,7 @@ import com.lyf.composescaffold.feature.browse.R
 /** 逛占位骨架：页面自行处理顶部安全区，背景可以延伸到状态栏后方。 */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun BrowseScreen(modifier: Modifier = Modifier) {
+internal fun BrowseScreen(modifier: Modifier = Modifier) {
     Scaffold(
         modifier = modifier.fillMaxSize(),
         containerColor = MaterialTheme.colorScheme.background,

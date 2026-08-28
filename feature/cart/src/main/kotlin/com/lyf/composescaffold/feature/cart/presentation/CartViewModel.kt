@@ -24,13 +24,13 @@ import kotlinx.coroutines.flow.receiveAsFlow
  */
 internal fun demoUnitPrice(position: Int): Money = Money((position + 1).toLong())
 
-data class CartItemUiState(
+internal data class CartItemUiState(
     val article: Article,
     val unitPrice: Money,
     val selected: Boolean = false,
 )
 
-data class CartUiState(
+internal data class CartUiState(
     override val dataList: List<CartItemUiState> = emptyList(),
     override val isRefreshing: Boolean = false,
     override val isInitializing: Boolean = true,
@@ -57,11 +57,11 @@ data class CartUiState(
     )
 }
 
-enum class CartError {
+internal enum class CartError {
     LOAD_FAILED,
 }
 
-sealed interface CartIntent {
+internal sealed interface CartIntent {
     data class ToggleItem(val itemId: Long) : CartIntent
     data object ToggleSelectAll : CartIntent
     data object Refresh : CartIntent
@@ -70,12 +70,12 @@ sealed interface CartIntent {
     data object Checkout : CartIntent
 }
 
-sealed interface CartEvent {
+internal sealed interface CartEvent {
     data class Checkout(val selectedItemIds: List<Long>) : CartEvent
 }
 
 @HiltViewModel
-class CartViewModel @Inject constructor(
+internal class CartViewModel @Inject constructor(
     private val repository: ArticleRepository,
 ) : ViewModel() {
     private val loadable: LoadableController<CartItemUiState, CartUiState> =

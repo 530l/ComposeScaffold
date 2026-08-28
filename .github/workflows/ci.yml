@@ -1,5 +1,8 @@
 name: CI
 
+permissions:
+  contents: read
+
 on:
   push:
     branches: ['**']
@@ -22,5 +25,5 @@ jobs:
       - name: Setup Gradle
         uses: gradle/actions/setup-gradle@v4
 
-      - name: Assemble, detekt and unit tests
-        run: ./gradlew assembleDebug detekt testDebugUnitTest --console=plain
+      - name: Assemble debug/release, detekt and unit tests
+        run: ./gradlew assembleDebug assembleRelease detekt testDebugUnitTest --console=plain

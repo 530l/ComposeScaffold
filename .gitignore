@@ -1,21 +1,25 @@
 *.iml
 .gradle
 /local.properties
-/.idea/caches
-/.idea/libraries
-/.idea/modules.xml
-/.idea/workspace.xml
-/.idea/navEditor.xml
-/.idea/assetWizardSettings.xml
+local.properties
+
+# IDE 与工具本地状态（.idea 未入库，整目录忽略）
+.idea/
+.kotlin/
+
 .DS_Store
 /build
 /captures
 .externalNativeBuild
 .cxx
-local.properties
 
 # secrets & build outputs
 .env*
 *.keystore
 *.jks
 **/build/
+*.apk
+*.aab
+*.ap_
+*.dex
+*.hprof

@@ -10,20 +10,20 @@
 | --- | --- | --- |
 | Android Gradle Plugin | 9.3.2 | built-in Kotlin = **2.2.10**（AGP 9 禁用外部 KGP，stdlib 被钉死在 2.2.10） |
 | KSP | 2.3.11 | 独立版本号，需 ≥2.3.1 才兼容 AGP 9 |
-| Compose BOM | 2026.08.00 | Material 3 + AppCompat 主题 |
+| Compose BOM | 2026.08.00 | Compose UI + Material 3 |
 | Activity Compose / Core Ktx / Splashscreen | 1.13.0 / 1.19.0 / 1.2.0 | |
 | Lifecycle | 2.11.0 | runtime-compose + viewmodel-compose + viewmodel-navigation3 |
 | Navigation 3 | 1.1.7 | androidx `navigation3-ui`，多返回栈 Tab 容器在 `core:design` |
 | Hilt | 2.60.1 | hilt-navigation-compose 1.4.0 |
 | Retrofit | 3.0.0 | converter-kotlinx-serialization |
-| OkHttp | 5.5.0 | 含 logging-interceptor |
+| OkHttp | 5.5.0 | 仅记录脱敏后的开发环境请求摘要 |
 | kotlinx-serialization / coroutines | 1.9.0 / 1.11.0 | 元数据兼容内置 Kotlin 2.2.10 的版本（勿盲目升级） |
 | Room | 2.8.4 | schema 导出至 `app/schemas/` |
-| MMKV | 2.4.2 | 键值存储（`KeyValueStore` 接口封装） |
+| MMKV | 2.4.2 | 非敏感键值存储（`KeyValueStore` 接口封装） |
 | Coil | 3.5.0 | coil-compose + coil-network-okhttp（3.6.0 为 Kotlin 2.4 元数据，不可用） |
 | Kermit | 2.1.0 | 统一日志门面（业务不直接依赖） |
 | detekt | 1.23.8 | 静态检查 + detekt-formatting |
-| 测试 | JUnit 4.13.2 / Truth 1.4.5 / Turbine 1.2.1 / Robolectric 4.16.1 | |
+| 测试 | JUnit 4.13.2 / Truth 1.4.5 / AndroidX Test | |
 
 compileSdk 37 / targetSdk 37 / minSdk 24；JVM 工具链：Gradle daemon JDK 22（foojay 自动装）。
 
@@ -44,7 +44,7 @@ app                         应用壳：五 Tab 壳、根导航、初始化、DI
   └── feature:login         根级全屏登录骨架、路由与 EntryProvider
 ```
 
-- 依赖方向：`app → core/feature`；feature 只依赖三个 core；core 内 `data/design → common` 单向；feature 之间、core → feature 反向依赖均禁止。
+- 依赖方向：`app → core/feature`；feature 只能按需依赖三个 core；core 内 `data/design → common` 单向；feature 之间、core → feature 反向依赖均禁止。
 - presentation 层 MVI：不可变 `UiState` + sealed `Intent` + `onIntent()` 唯一入口；初始加载在 ViewModel `init {}`，Composable 不直接触发业务加载。
 - 分页列表走 `core:design` 的 `LoadableController` 状态机 + `LoadableLazyColumn` 容器，互斥去重与结束判定有 JVM 单测覆盖。
 - Room 数据库与 KSP 处理器集中在 `app`；各业务 Entity/Dao 在 feature 的 `data/local`，由 `app` 的 `AppDatabase` 注册。
@@ -62,7 +62,9 @@ COMPOSE_SCAFFOLD_KEY_ALIAS=replace_me
 COMPOSE_SCAFFOLD_KEY_PASSWORD=replace_me
 ```
 
-不要把 API token、证书密码、签名私钥或真实生产密钥提交到仓库。
+不要把 API token、证书密码、签名私钥或真实生产密钥提交到仓库。未配置上述四项时 release 产物保持未签名，只用于本地 R8 验证，不能发布。
+
+`KeyValueStore` 的默认 MMKV 实现不加密，只能保存界面偏好、缓存标记等非敏感状态。登录 token、密码、支付凭证和个人敏感信息必须使用基于 Android Keystore 的独立凭证存储。
 
 ## 数据库升级约定
 
@@ -77,16 +79,17 @@ COMPOSE_SCAFFOLD_KEY_PASSWORD=replace_me
 ./gradlew assembleDebug detekt testDebugUnitTest --console=plain
 ```
 
-CI 在 `.github/workflows/ci.yml`：push/PR 触发，JDK 22（Temurin）+ Gradle 缓存，跑上面同款命令。
+CI 在 `.github/workflows/ci.yml`：push/PR 触发，JDK 22（Temurin）+ Gradle 缓存；除上述检查外还构建未签名 release，提前发现 R8 问题。
 
 ## 商用前仍需补齐
 
 - 替换 applicationId、图标、品牌主题和演示 API 地址（wanandroid）。
-- UI 测试（androidTest 目前仅模板用例）与更高覆盖的集成测试。
+- UI 测试（androidTest 目前没有业务场景）与更高覆盖的集成测试。
+- baselineprofile 插件适配 AGP 9 后恢复生成任务，并用 Macrobenchmark 验证关键用户路径。
 - 依赖漏洞扫描（如 Dependabot / dependency-check）与许可证合规流水线。
 - 崩溃上报、性能监控、埋点、用户协议、隐私政策与账号注销流程。
 - Android 数据安全表单、商店隐私声明与权限最小化审查。
-- R8 混淆规则、签名发布流水线与渠道打包方案。
+- 按实际接入的业务 SDK 补齐 R8 规则，并建设签名发布流水线与渠道打包方案。
 - 按发布地区完成第三方许可证、税务、支付、无障碍和合规审查。
 
 第三方组件及许可证摘要见 [THIRD_PARTY_NOTICES.md](./THIRD_PARTY_NOTICES.md)。

@@ -6,9 +6,8 @@ import org.junit.Rule
 import org.junit.Test
 
 /**
- * 启动基线配置生成器：连接模拟器运行
- * `./gradlew :app:generateReleaseBaselineProfile`，
- * 产出的 profile 会在 release 构建中随 APK 分发（profileinstaller）。
+ * 启动基线配置生成器。当前 baselineprofile 插件尚未适配 AGP 9，此类暂不参与构建；
+ * 恢复插件和模块依赖后，再通过对应的 generateBaselineProfile 任务生成配置文件。
  */
 class StartupBaselineProfileGenerator {
     @get:Rule
