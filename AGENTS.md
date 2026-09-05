@@ -30,7 +30,10 @@
 - 新增数据库 Entity：Entity/Dao 统一放入 `core:data` 对应的业务仓储包（如 `core/data/<domain>/local`），必须到 `app` 的
   `AppDatabase` 注册；Room 的 KSP 处理器只挂在 `app/build.gradle.kts`，schema 导出在 `app/schemas/`。
 - 改数据库结构 = 新版本号 + 提交 `app/schemas/` 下新 JSON + 写迁移，三件事一起做。
-- 业务数据模型统一放入 `core:model`（按领域包划分，如 `core.model.article.*`）；Retrofit 接口统一扁平放入 `core:data/api`（按模块前缀命名，如 `CartApi.kt`），Repository 契约与实现统一扁平放入 `core:data/repository`（按模块前缀命名，如 `CartRepository.kt`），不分子包。Feature 为纯展示层，ViewModel 直接注入 Repository 并消费业务 Model，免除机械透传 UseCase 与重复 DTO 映射。网络客户端复用 `core:data` 的 `NetworkFactory`，网络错误边界统一走 `core:model` 的 `NetworkResult`。
+- 数据模型与状态职责强隔离：
+  - `core:model` 统一存放 API/服务端返回的数据模型（Data Model，如 `core.model.article.Article`）及全局基础值对象（如 `Money`, `NetworkResult`），严禁存放任何与 UI/交互相关的瞬态状态；
+  - 各 Feature 独有的界面交互状态（如 `CartUiState`、`CartItemUiState` 包含的选中状态、折叠状态、输入草稿等）严格保留在各自 Feature 模块内，通过组合（Composition）方式按需包装 `core:model` 的数据实体，严禁在 Feature 中复制冗余的 DTO 或编写无意义的字段映射。
+- 仓储与网络接口规范：Retrofit 接口统一扁平放入 `core:data/api`（按模块前缀命名，如 `CartApi.kt`），Repository 契约与实现统一扁平放入 `core:data/repository`（按模块前缀命名，如 `CartRepository.kt`），不分子包。Feature 为纯展示层，ViewModel 直接注入 Repository 并消费业务 Model，免除机械透传 UseCase。网络客户端复用 `core:data` 的 `NetworkFactory`，网络错误边界统一走 `core:model` 的 `NetworkResult`。
 
 ## 代码约定
 

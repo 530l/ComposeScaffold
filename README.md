@@ -32,7 +32,7 @@ compileSdk 37 / targetSdk 37 / minSdk 24；JVM 工具链：Gradle daemon JDK 22�
 ```text
 app                         应用壳：五 Tab 壳、根导航、初始化、DI/Room 数据库聚合、发布配置
   ├── core:common           基础层（Android library、零 UI 依赖）：日志（AppLogger）、运行配置（AppConfig）
-  ├── core:model            通用业务契约与模型底座（零外部框架/IO 依赖）：Money、NetworkResult、业务实体（如 Article）
+  ├── core:model            数据实体底座（零外部框架/IO 依赖）：API 返回的业务数据模型（如 Article）及通用值对象（Money、NetworkResult）
   ├── core:data             统一数据层与基础设施：
   │                         - repository/（扁平存放各模块仓储契约与实现，用模块前缀区分，如 CartRepository.kt）
   │                         - api/（扁平存放 Retrofit 接口，用模块前缀区分，如 CartApi.kt）
@@ -49,7 +49,10 @@ app                         应用壳：五 Tab 壳、根导航、初始化、DI
 ```
 
 - 依赖方向：`app → core/feature`；feature 按需依赖四个 core；core 内部 `core:model` 为零依赖纯叶子底座，`core:data / core:design` 单向依赖 `core:model` 与 `core:common`；禁止 core → app/feature（反向依赖）、feature 互相依赖。
-- 架构约定：各 Feature 作为纯 Presentation 层（`presentation/` + `navigation/`），ViewModel 直接通过 Hilt 注入 `core:data` 的 Repository 并直接消费 `core:model` 领域实体（免除机械透传 UseCase 与无意义 DTO 映射）。
+- 模型与状态约定：
+  - `core:model` 存放所有 API 服务端返回的数据模型及全局值对象；
+  - 各 Feature 独有的界面交互状态（选中、展开、草稿等）保留在 Feature 内部的 `UiState` 中，通过「组合（Composition）」直接包裹 `core:model` 实体，免除冗余 DTO 与机械映射；
+  - Feature 作为纯 Presentation 层（`presentation/` + `navigation/`），ViewModel 直接注入 `core:data` 的 Repository，免除机械透传 UseCase。
 - presentation 层 MVI：不可变 `UiState` + sealed `Intent` + `onIntent()` 唯一入口；初始加载在 ViewModel `init {}`，Composable 不直接触发业务加载。
 - 分页列表走 `core:design` 的 `LoadableController` 状态机 + `LoadableLazyColumn` 容器，互斥去重与结束判定有 JVM 单测覆盖。
 - Room 数据库与 KSP 处理器集中在 `app`；各业务 Entity/Dao 集中在 `core:data`，由 `app` 的 `AppDatabase` 注册。
