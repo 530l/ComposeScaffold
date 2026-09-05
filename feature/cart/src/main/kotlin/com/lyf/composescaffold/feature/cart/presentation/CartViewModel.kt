@@ -8,9 +8,9 @@ import com.lyf.composescaffold.core.design.ui.loadmore.LoadableController
 import com.lyf.composescaffold.core.design.ui.loadmore.LoadableUiState
 import com.lyf.composescaffold.core.design.ui.loadmore.LoadMoreState
 import com.lyf.composescaffold.core.design.ui.loadmore.Page
-import com.lyf.composescaffold.feature.cart.domain.Article
-import com.lyf.composescaffold.feature.cart.domain.ArticlePage
-import com.lyf.composescaffold.feature.cart.domain.ArticleRepository
+import com.lyf.composescaffold.feature.cart.data.Article
+import com.lyf.composescaffold.feature.cart.data.ArticlePage
+import com.lyf.composescaffold.feature.cart.data.ArticleRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
 import kotlinx.coroutines.channels.Channel

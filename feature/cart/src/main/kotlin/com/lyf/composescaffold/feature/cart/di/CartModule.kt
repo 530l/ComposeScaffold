@@ -1,8 +1,8 @@
 package com.lyf.composescaffold.feature.cart.di
 
+import com.lyf.composescaffold.feature.cart.data.ArticleRepository
 import com.lyf.composescaffold.feature.cart.data.DefaultArticleRepository
 import com.lyf.composescaffold.feature.cart.data.remote.ArticleListApi
-import com.lyf.composescaffold.feature.cart.domain.ArticleRepository
 import dagger.Binds
 import dagger.Module
 import dagger.Provides

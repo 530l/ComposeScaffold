@@ -40,7 +40,7 @@ app                         应用壳：五 Tab 壳、根导航、初始化、DI
   ├── feature:home          「首页」独立 tab 与 EntryProvider
   ├── feature:browse        「逛」独立 tab 与 EntryProvider
   ├── feature:message       「消息」独立 tab 与 EntryProvider
-  ├── feature:cart          「购物车」data / domain / presentation / EntryProvider（wanandroid 分页示例）
+  ├── feature:cart          「购物车」data / presentation / EntryProvider（wanandroid 分页示例，直接复用服务端数据模型，免除无意义的 DTO 映射）
   ├── feature:mine          「我的」独立 tab 与 EntryProvider
   └── feature:login         根级全屏登录骨架、路由与 EntryProvider
 ```
