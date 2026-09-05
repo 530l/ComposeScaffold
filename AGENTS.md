@@ -1,97 +1,192 @@
 # AGENTS.md — ComposeScaffold 工程 Agent 工作守则
 
-面向 Android 原生的商业化 Compose 脚手架（AGP 9.3.2 built-in Kotlin 2.2.10 / Compose BOM 2026.08.00 / compileSdk 37 / minSdk 24）。
-姐妹项目是 CMP 版 `CmpAppScaffold`（KMP/iOS），本工程是独立的 Android-only 演进线，不与鸿蒙端对标。
-模块边界、分层职责的完整说明见 `README.md`，本文件只补充 agent 操作层面的规则。
+面向 Android 原生商用 Compose 脚手架（AGP 9.3.2 built-in Kotlin 2.2.10 / Compose BOM 2026.08.00 / compileSdk 37 / minSdk 24）的 AI 协同开发守则与操作规程。
 
-## 验证命令（改动代码后必须全绿才算完成）
+---
+
+## 1. 验证命令（Commands You Can Use — 必须首先掌握）
+
+任何代码修改后，**必须运行并通过以下验证命令（退出码为 0 且 100% 绿灯才算完成任务）**：
 
 ```bash
+# 全工程核心验证命令（构建 + Detekt 静态检查 + 单元测试，CI 同款）
 ./gradlew assembleDebug detekt testDebugUnitTest --console=plain
 ```
 
-- detekt 配置在根 `config/detekt/detekt.yml`（buildUponDefaultConfig），各模块挂了
-  detekt-formatting；放宽规则优先改 yml，其次才是改代码，禁止为过检删测试。
-- Gradle daemon toolchain 是 JDK 22（`gradle/gradle-daemon-jvm.properties` + foojay 自动装）。
-  **不要升到 23+**：detekt 1.23.8 内嵌的 Kotlin 编译器在 JDK 24+ 上直接崩
-  （`IllegalArgumentException: 25.0.2`），22 是其支持上限。
-- 不要用 `| tail` 管道包住 gradlew 判断成败，退出码会被吞。
+### 单模块/局部常用命令：
+```bash
+# 仅运行指定 Feature 的单元测试（例如 cart 模块）
+./gradlew :feature:cart:testDebugUnitTest --console=plain
 
-## 模块与依赖铁律
+# 仅运行代码格式与静态检查
+./gradlew detekt --console=plain
 
-- 依赖方向只允许 `app → {core:common, core:model, core:data, core:design, feature:*}`；
-  feature 按需依赖四个 core 模块。`core:model` 为纯领域模型叶子底座（零项目依赖）；
-  `core:data / core:design` 允许单向依赖 `core:common` 与 `core:model`；
-  禁止 core → app/feature（反向依赖）、feature 互相依赖、core:model 依赖任何兄弟模块。
-- 底部 tab 的注册点是 `app/navigation/TopLevelTab.kt`（枚举持路由）+ `AppNavigation.kt` 的
-  bottomBar；多返回栈机制在 `core:design/navigation/TabNavigation.kt`，切 tab 不清栈，
-  各 tab 返回历史独立。登录等全局全屏流程走 `AppNavigation.kt` 的根栈，不塞进任一 tab 栈。
-- 跨 feature 跳转只能在 `app/navigation/AppNavigation.kt` 用回调连接，feature 之间不互引页面。
-- 新增数据库 Entity：Entity/Dao 统一放入 `core:data` 对应的业务仓储包（如 `core/data/<domain>/local`），必须到 `app` 的
-  `AppDatabase` 注册；Room 的 KSP 处理器只挂在 `app/build.gradle.kts`，schema 导出在 `app/schemas/`。
-- 改数据库结构 = 新版本号 + 提交 `app/schemas/` 下新 JSON + 写迁移，三件事一起做。
-- 数据模型与状态职责强隔离：
-  - `core:model` 统一存放 API/服务端返回的数据模型（Data Model，如 `core.model.article.Article`）及全局基础值对象（如 `Money`, `NetworkResult`），严禁存放任何与 UI/交互相关的瞬态状态；
-  - 各 Feature 独有的界面交互状态（如 `CartUiState`、`CartItemUiState` 包含的选中状态、折叠状态、输入草稿等）严格保留在各自 Feature 模块内，通过组合（Composition）方式按需包装 `core:model` 的数据实体，严禁在 Feature 中复制冗余的 DTO 或编写无意义的字段映射。
-- 仓储与网络接口规范：Retrofit 接口统一扁平放入 `core:data/api`（按模块前缀命名，如 `CartApi.kt`），Repository 契约与实现统一扁平放入 `core:data/repository`（按模块前缀命名，如 `CartRepository.kt`），不分子包。Feature 为纯展示层，ViewModel 直接注入 Repository 并消费业务 Model，免除机械透传 UseCase。网络客户端复用 `core:data` 的 `NetworkFactory`，网络错误边界统一走 `core:model` 的 `NetworkResult`。
+# 重新生成 Baseline Profile（需适配环境）
+./gradlew :baselineprofile:assembleDebug --console=plain
+```
 
-## 代码约定
+### 工具链约束铁律：
+- **Gradle Daemon JDK 必须为 22**（由 `gradle/gradle-daemon-jvm.properties` + foojay 自动拉取）：
+  **严禁升至 JDK 23+**。Detekt 1.23.8 内置的 Kotlin 编译器在 JDK 24+ 上会发生崩溃（`IllegalArgumentException: 25.0.2`），JDK 22 是其支持上限。
+- **禁止使用管道吞噬退出码**：
+  严禁使用 `./gradlew ... | tail -n 20`，管道会吞掉非零退出码导致误判构建结果。
 
-- presentation 层 MVI 单向数据流：不可变 `UiState`（派生量用计算属性）+ sealed `Intent` +
-  `onIntent()` 唯一入口；Composable 子组件只收状态与回调，不持有 ViewModel。
-- 初始加载放 ViewModel `init {}`（列表页即 `loadable.initialize()`）。Nav3 entry 首次进
-  组合才创建 VM，`init` 等价「首次进入屏幕」；切 tab/返回只是重进组合、VM 不重建，初始
-  加载不会重跑，状态天然保留，单测构造 VM 后 advanceUntilIdle 即完成初始加载。
-  Composable 禁止 `LaunchedEffect(Unit) { vm.loadXxx() }` 式 UI 直接触发业务加载，
-  `LaunchedEffect` 只用于生命周期信号（返回键、权限申请）与事件收集（ObserveAsEvents）；
-  刷新/重试/触底一律走 Intent，不引入 ScreenStarted 式启动 Intent。
-- 分页列表统一走 `core:design` 的 `core/ui/loadmore`：UiState 实现 `LoadableUiState`，
-  `LoadableController` 负责页码、互斥去重与结束判定（`Page(items, hasMore)` 由调用方按
-  后端 cursor/总数信号显式给出，不要用「返回条数 < pageSize」推断）。
-- 金额一律用 `core:model/Money`（最小货币单位 Long），展示用 `formatMoney`，禁止浮点。
-- 日志走 `core:common/log/AppLogger`，不直接依赖 Kermit；网络错误走 `NetworkResult` 边界，
-  `CancellationException` 必须原样重抛。
-- 协程调度器一律注入 `@IoDispatcher` / `@DefaultDispatcher`（定义于 `core:data/coroutine`），
-  禁止在数据层、领域层硬编码使用裸 `Dispatchers.IO` / `Dispatchers.Default`，单测构造时通过参数传入 `StandardTestDispatcher`。
-- 键值与凭证存储强边界隔离：
-  - 非敏感偏好设置、缓存标记只注入 `core:data/storage/KeyValueStore` 接口（MMKV 实现）；
-  - Token、刷新令牌、密码和个人敏感信息一律注入 `core:data/storage/SecureCredentialStore` 接口
-    （Android Keystore AES-256 GCM 硬件加密实现），严禁明文存入 MMKV。
-- 网络认证与 401 登出链路：网络客户端由 `AuthInterceptor` 自动装配 `SecureCredentialStore` 的
-  Bearer Token；遇到 401 响应通过 `SessionEventManager` 广播，应用根导航集中监听并重定向至全屏登录页，
-  Feature 无需重复编写 401 拦截弹窗逻辑。
-- 领域层 UseCase 约定：简单单表或单接口操作，保持 ViewModel 直接调用 Repository，
-  禁止机械化堆叠仅有一行转发的透传式 UseCase（避免过度工程化）；仅在存在跨 Repository 聚合、
-  复用率高或包含核心商业计算规则时才抽取单职责 UseCase（遵循单一 `operator fun invoke`）。
-- Nav3 路由 `data object` 必须覆写 `toString()` 返回 `接口名.对象名`（如 `"CartRoute.Main"`）：
-  导航宿主显式用 `key.toString()` 作 contentKey，是 saveable 状态（含滚动位置）与 entry 级
-  ViewModelStore 的存取键；裸 `data object Main` 跨 feature 全叫 "Main"，会互相覆盖、
-  弹出时互相误删（症状：返回/切 tab 后列表回顶部）。
-- 多返回栈 tab 必须走 `core:design` 的 `TabAppNavHost`：每个 tab 的栈各自调用
-  `rememberDecoratedNavEntries`，并持有各自独立的 entry decorators，NavDisplay 按 entries 切换。
-  不要把不同栈轮流塞给同一个 NavDisplay 的 backStack 参数——上一 tab 的 entry 会被
-  误判为弹出并清掉状态。
-- 应用窗口保持 edge-to-edge，根导航不统一添加 safeDrawing padding；页面背景铺满窗口，
-  文字、按钮等交互内容由页面自己的 Scaffold/TopAppBar/WindowInsets 避让系统栏和刘海。
+---
 
-## 版本与依赖
+## 2. 行为边界准则（Three-Tier Boundaries）
 
-- 版本号以 `gradle/libs.versions.toml` 为唯一来源。新增/升级依赖先到
-  repo1.maven.org 或 dl.google.com 的 `maven-metadata.xml` 核实最新版，
-  **search.maven.org 的 latestVersion 会滞后，不可信**。默认选稳定版，不为追新上 alpha/beta。
-- **AGP 9 built-in Kotlin = 2.2.10 元数据兼容铁律**：AGP 9 禁用 `org.jetbrains.kotlin.android`，
-  Kotlin 版本由 AGP 内置通道锁死，**禁止升级 Kotlin 编译器插件版本，也禁止引入用
-  Kotlin 2.3+ 编译的三方库**（其 metadata 无法被 2.2.10 消费，编译期报
-  "metadata version is not supported"）。引入前先核实该库的 Kotlin 兼容性（查发布说明或
-  module metadata）；stdlib 已由根 `build.gradle.kts` 的 resolutionStrategy 钉在 2.2.10，
-  不要动。参考：kotlinx-serialization 用 1.9.0、Coil 用 3.5.0，均为元数据兼容版本。
-- KSP 用独立版本号（当前 2.3.11），不跟 Kotlin 版本前缀绑定。
-- Hilt 版本升级要同时核对内置 Kotlin 与 KSP 兼容矩阵。
-- detekt 1.23.8 与 JDK daemon 22 的约束见上文「验证命令」。
+基于 2500+ 代码仓库的最佳实践，Agent 在本工程中严格遵守以下三级操作边界：
 
-## Git
+### ✅ Always（必须做到）
+1. **验证全绿**：改动任何 Kotlin/Gradle 文件后，必须执行全量验证命令且全绿。
+2. **金额强类型**：涉及货币与金额一律使用 `core:model/Money`（以分/最小单位 Long 存储），展示格式化走 `formatMoney`，禁止浮点数计算。
+3. **MVI 单向流**：Presentation 层严格遵循不可变 `UiState` + sealed `Intent` + `onIntent()` 单一入口；Composable 组件只接收状态和回调。
+4. **初始加载内聚**：首次数据加载必须在 ViewModel `init {}` 中调用（如 `loadable.initialize()`），禁止由 UI 声明周期副作用拉起业务。
+5. **调度器可注入**：协程调度器一律注入 `@IoDispatcher` / `@DefaultDispatcher`，单测中注入 `StandardTestDispatcher`。
+6. **硬件级安全加密**：Token、密码、支付凭证统一注入 `core:data/storage/SecureCredentialStore`（基于 Android Keystore AES-256 GCM 硬件加密实现）。
+7. **Nav3 路由命名**：Nav3 路由 `data object` 必须覆写 `toString()` 返回 `接口名.对象名`（如 `"CartRoute.Main"`），作为 contentKey 确保多返回栈状态保存。
+8. **Git Agent 署名**：Agent 自动生成的快照提交必须署名 `git -c user.name="local-snapshot" -c user.email="snapshot@local"`。
 
-- agent 代跑的提交署名 `git -c user.name="local-snapshot" -c user.email="snapshot@local"`，
-  用户手动提交用本人全局身份。
-- 构建产物、`local.properties`、keystore、`.env*` 均不入库（`.gitignore` 已覆盖）。
-- release 签名参数走用户级 `~/.gradle/gradle.properties` 注入，绝不硬编码进仓库。
+### ⚠️ Ask First（修改前必须请示用户）
+1. **添加/升级依赖**：修改 `gradle/libs.versions.toml` 引入新库或升版前，必须向用户确认并核实该库是否兼容 Kotlin 2.2.10 元数据（AGP 9 锁死内置 Kotlin 2.2.10，任何 2.3+ 编译的三方库均不可用）。
+2. **修改数据库 Schema**：变更 Room Entity 结构前必须请示（需同时完成：递增版本号 + 导出新 JSON schema + 编写 Migration 迁移）。
+3. **修改全局导航拓扑**：修改 `TopLevelTab.kt`、根导航 `AppNavigation.kt` 或公共返回栈机制。
+
+### 🚫 Never（绝对禁止的红线）
+1. **严禁删测试过检**：禁止为了让构建/Lint 通过而删除、弱化或注释掉失败的单元测试。
+2. **严禁污染 core:model**：`core:model` 只存服务端返回的数据实体与通用值对象，**严禁放入任何 UI 状态**（如 `isSelected`, `isExpanded`, `isLoading`）。
+3. **严禁在 Feature 中机械复制 DTO**：Feature 严禁自建与 API 结构一模一样的重复 Model 类或编写空转的 DTO 映射代码。
+4. **严禁空转 UseCase**：简单单表/单接口 CRUD 严禁编写仅有一行调用的透传 UseCase（避免过度设计）。
+5. **严禁跨 Feature 直接依赖**：依赖方向只能是 `app -> core/feature` 与 `feature -> core`。Feature 之间互不可见，禁止 Feature 互相依赖，禁止 Core 反向依赖 Feature。
+6. **严禁明文存敏感数据**：MMKV（`KeyValueStore`）仅用于非敏感配置与缓存标记，严禁存入 Token 或用户凭证。
+7. **严禁在 UI 中触发业务加载**：禁止使用 `LaunchedEffect(Unit) { viewModel.load() }` 直接调用业务请求。
+8. **严禁提交敏感资产**：构建产物、`local.properties`、keystore、`.env*` 严禁提交进 Git。
+
+---
+
+## 3. 架构分层与目录规范（Architecture & File Structure）
+
+```
+app                         应用壳：五 Tab 壳、根导航、Room 数据库聚合、Hilt 根组件
+  ├── core:common           通用底座（零 UI 依赖）：日志门面（AppLogger）、配置（AppConfig）
+  ├── core:model            数据实体底座（零外部框架/IO 依赖）：
+  │                         - API 服务端返回的业务模型（如 Article, WanApiResponse, ArticlePage）
+  │                         - 基础领域值对象（Money, PriceUtils）
+  │                         - 网络异常与结果模型（NetworkResult, NetworkError）
+  ├── core:data             统一数据仓储与基础设施：
+  │   ├── repository/       扁平存放各 Feature 的仓储契约与实现（模块前缀命名，如 CartRepository.kt）
+  │   ├── api/              扁平存放 Retrofit 接口（模块前缀命名，如 CartApi.kt）
+  │   ├── di/               Hilt 数据注入模块（如 CartDataModule.kt）
+  │   ├── network/          网络基础设施（NetworkFactory, SafeRequest, AuthInterceptor, SessionEventManager）
+  │   ├── storage/          存储抽象（KeyValueStore / SecureCredentialStore 硬件加密）
+  │   └── coroutine/        调度器限定符（@IoDispatcher, @DefaultDispatcher）
+  ├── core:design           Compose UI 工具箱：主题（AppTheme）、图片（AppImage/Coil）、Loadable 列表状态机、Nav3 容器
+  └── feature:<name>        纯 Presentation 业务模块（feature:cart, feature:home 等）：
+      ├── presentation/     MVI 界面交互（UiState + Intent + ViewModel + Composable 页面）
+      └── navigation/       路由契约与 EntryProvider
+```
+
+---
+
+## 4. 代码范式对照示例（Standards & Concrete Examples）
+
+### 示例 1：模型与状态隔离（组合优于重复映射）
+
+```kotlin
+// ❌ 错误：在 Feature 中重复拷贝整套字段定义并写冗余 Mapper
+data class CartArticleUiModel(val id: Long, val title: String, val author: String, val selected: Boolean)
+fun Article.toUiModel() = CartArticleUiModel(id, title, author, false)
+
+// ❌ 错误：把 UI 状态污染到 core:model 实体中
+@Serializable
+data class Article(val id: Long, val title: String, var isSelected: Boolean = false)
+
+// ✅ 正确：core:model 保持纯净数据；Feature 的 UIState 通过组合直接包裹实体
+// 在 feature:cart/presentation/CartViewModel.kt 中：
+internal data class CartItemUiState(
+    val article: Article,           // 直接复用 core:model 实体，零拷贝
+    val unitPrice: Money,           // 业务派生状态
+    val selected: Boolean = false,  // 页面私有的交互状态
+)
+```
+
+### 示例 2：Hilt ViewModel 正确引入
+
+```kotlin
+// ❌ 错误：使用已废弃的旧路径（会导致编译器 deprecation 警告）
+import androidx.hilt.navigation.compose.hiltViewModel
+
+// ✅ 正确：使用 AndroidX 官方推荐的生命周期包
+import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
+
+@Composable
+internal fun CartScreen(
+    viewModel: CartViewModel = hiltViewModel(),
+) { ... }
+```
+
+### 示例 3：初始加载与 MVI 单向流
+
+```kotlin
+// ❌ 错误：在 Composable 中使用 LaunchedEffect 触发首次数据加载（切 tab 重复触发）
+@Composable
+fun CartScreen(viewModel: CartViewModel) {
+    LaunchedEffect(Unit) { viewModel.loadArticles() }
+}
+
+// ✅ 正确：在 ViewModel 的 init {} 块中初始化，状态在进程存活期自动保留
+@HiltViewModel
+internal class CartViewModel @Inject constructor(
+    private val repository: CartRepository,
+) : ViewModel() {
+    private val loadable = LoadableController(..., loadPage = ::loadPage)
+
+    init {
+        loadable.initialize() // 首次进入进组合即触发，切 Tab 重进不会重复触发
+    }
+
+    fun onIntent(intent: CartIntent) { ... }
+}
+```
+
+### 示例 4：金额计算与展示
+
+```kotlin
+// ❌ 错误：使用 Double / Float 计算商业金额（存在精度丢失风险）
+val total: Double = items.sumOf { it.price * it.quantity }
+val display = "¥${total}"
+
+// ✅ 正确：统一使用 core:model 的 Money（单位：分）与 formatMoney
+val total: Money = items.fold(Money.zero()) { acc, item -> acc + item.unitPrice }
+val display: String = formatMoney(total) // 输出标准 ¥XX.XX
+```
+
+### 示例 5：Nav3 路由定义
+
+```kotlin
+// ❌ 错误：裸 data object 使用默认 toString()，会导致跨 feature contentKey 冲突并重置状态
+@Serializable
+data object Main : NavRoute
+
+// ✅ 正确：必须覆写 toString() 包含前缀命名空间
+@Serializable
+data object Main : CartRoute {
+    override fun toString(): String = "CartRoute.Main"
+}
+```
+
+---
+
+## 5. Git 提交与协作守则
+
+- **Agent 提交命令**：
+  ```bash
+  git -c user.name="local-snapshot" -c user.email="snapshot@local" commit -m "<type>: <description>"
+  ```
+- **Commit Type 规范**：
+  - `feat`: 新增业务功能或模块；
+  - `fix`: 修复缺陷或错误；
+  - `refactor`: 架构重构（如目录扁平化、下沉公共层）；
+  - `test`: 新增或调整单元测试；
+  - `docs`: 文档变更或工作守则更新。
+- **干净工作区原则**：提交前确保无未追踪临时文件，构建产物严禁入库。
