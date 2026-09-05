@@ -1,5 +1,6 @@
 plugins {
     alias(libs.plugins.android.library)
+    alias(libs.plugins.kotlin.serialization)
     alias(libs.plugins.detekt)
 }
 
@@ -20,6 +21,7 @@ android {
 dependencies {
     detektPlugins(libs.detekt.formatting)
     // core:model 是纯领域契约与模型底座：零外部网络/数据库/UI依赖
+    implementation(libs.kotlinx.serialization.json)
     testImplementation(libs.junit)
     testImplementation(libs.truth)
 }

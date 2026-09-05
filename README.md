@@ -32,23 +32,24 @@ compileSdk 37 / targetSdk 37 / minSdk 24；JVM 工具链：Gradle daemon JDK 22�
 ```text
 app                         应用壳：五 Tab 壳、根导航、初始化、DI/Room 数据库聚合、发布配置
   ├── core:common           基础层（Android library、零 UI 依赖）：日志（AppLogger）、运行配置（AppConfig）
-  ├── core:model            纯领域契约与模型底座（零外部框架/IO 依赖）：Money、NetworkResult 错误模型、通用业务契约
-  ├── core:data             数据基础设施：Retrofit/OkHttp 工厂（含 Auth 拦截与 401 会话失效流）、
-  │                         KeyValueStore (MMKV) / SecureCredentialStore (Android Keystore)、调度器与核心 DI 模块
+  ├── core:model            通用业务契约与模型底座（零外部框架/IO 依赖）：Money、NetworkResult、业务实体（如 Article）
+  ├── core:data             统一数据层与基础设施：按仓储领域划分包结构（如 article/、network/、storage/），承载 Retrofit API、
+  │                         Repository 实现、KeyValueStore (MMKV) / SecureCredentialStore、调度器与 DI 模块
   ├── core:design           Compose 工具箱：主题、图片（AppImage/Coil）、刷新/加载更多组件族
   │                         （LoadableLazyColumn/LoadableController）、状态页与 Navigation 3 容器
-  ├── feature:home          「首页」独立 tab 与 EntryProvider
-  ├── feature:browse        「逛」独立 tab 与 EntryProvider
-  ├── feature:message       「消息」独立 tab 与 EntryProvider
-  ├── feature:cart          「购物车」data / presentation / EntryProvider（wanandroid 分页示例，直接复用服务端数据模型，免除无意义的 DTO 映射）
-  ├── feature:mine          「我的」独立 tab 与 EntryProvider
+  ├── feature:home          「首页」纯展示模块（独立 tab 与 EntryProvider）
+  ├── feature:browse        「逛」纯展示模块（独立 tab 与 EntryProvider）
+  ├── feature:message       「消息」纯展示模块（独立 tab 与 EntryProvider）
+  ├── feature:cart          「购物车」纯展示模块（MVI 单向流 + 列表状态机，直接注入 core:data 仓储并消费 core:model 模型）
+  ├── feature:mine          「我的」纯展示模块（独立 tab 与 EntryProvider）
   └── feature:login         根级全屏登录骨架、路由与 EntryProvider
 ```
 
 - 依赖方向：`app → core/feature`；feature 按需依赖四个 core；core 内部 `core:model` 为零依赖纯叶子底座，`core:data / core:design` 单向依赖 `core:model` 与 `core:common`；禁止 core → app/feature（反向依赖）、feature 互相依赖。
+- 架构约定：各 Feature 作为纯 Presentation 层（`presentation/` + `navigation/`），ViewModel 直接通过 Hilt 注入 `core:data` 的 Repository 并直接消费 `core:model` 领域实体（免除机械透传 UseCase 与无意义 DTO 映射）。
 - presentation 层 MVI：不可变 `UiState` + sealed `Intent` + `onIntent()` 唯一入口；初始加载在 ViewModel `init {}`，Composable 不直接触发业务加载。
 - 分页列表走 `core:design` 的 `LoadableController` 状态机 + `LoadableLazyColumn` 容器，互斥去重与结束判定有 JVM 单测覆盖。
-- Room 数据库与 KSP 处理器集中在 `app`；各业务 Entity/Dao 在 feature 的 `data/local`，由 `app` 的 `AppDatabase` 注册。
+- Room 数据库与 KSP 处理器集中在 `app`；各业务 Entity/Dao 集中在 `core:data`，由 `app` 的 `AppDatabase` 注册。
 
 ## 环境配置
 

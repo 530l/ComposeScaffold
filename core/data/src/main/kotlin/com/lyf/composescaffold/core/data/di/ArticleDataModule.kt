@@ -1,8 +1,8 @@
-package com.lyf.composescaffold.feature.cart.di
+package com.lyf.composescaffold.core.data.di
 
-import com.lyf.composescaffold.feature.cart.data.ArticleRepository
-import com.lyf.composescaffold.feature.cart.data.DefaultArticleRepository
-import com.lyf.composescaffold.feature.cart.data.remote.ArticleListApi
+import com.lyf.composescaffold.core.data.article.ArticleListApi
+import com.lyf.composescaffold.core.data.article.ArticleRepository
+import com.lyf.composescaffold.core.data.article.DefaultArticleRepository
 import dagger.Binds
 import dagger.Module
 import dagger.Provides
@@ -13,11 +13,11 @@ import javax.inject.Singleton
 
 @Module
 @InstallIn(SingletonComponent::class)
-internal abstract class CartModule {
+abstract class ArticleDataModule {
 
     @Binds
     @Singleton
-    abstract fun bindArticleRepository(impl: DefaultArticleRepository): ArticleRepository
+    internal abstract fun bindArticleRepository(impl: DefaultArticleRepository): ArticleRepository
 
     companion object {
         @Provides

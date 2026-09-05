@@ -49,7 +49,7 @@ import com.lyf.composescaffold.core.design.ui.loadmore.LoadMoreState
 import com.lyf.composescaffold.core.design.ui.state.LoadableErrorBanner
 import com.lyf.composescaffold.core.design.ui.state.LoadableStateContent
 import com.lyf.composescaffold.feature.cart.R
-import com.lyf.composescaffold.feature.cart.data.Article
+import com.lyf.composescaffold.core.model.article.Article
 
 @Composable
 internal fun CartScreen(

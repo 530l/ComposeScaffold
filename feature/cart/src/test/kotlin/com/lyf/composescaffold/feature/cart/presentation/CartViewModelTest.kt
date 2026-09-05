@@ -4,9 +4,9 @@ import com.google.common.truth.Truth.assertThat
 import com.lyf.composescaffold.core.model.Money
 import com.lyf.composescaffold.core.model.formatMoney
 import com.lyf.composescaffold.core.design.ui.loadmore.LoadMoreState
-import com.lyf.composescaffold.feature.cart.data.Article
-import com.lyf.composescaffold.feature.cart.data.ArticlePage
-import com.lyf.composescaffold.feature.cart.data.ArticleRepository
+import com.lyf.composescaffold.core.data.article.ArticleRepository
+import com.lyf.composescaffold.core.model.article.Article
+import com.lyf.composescaffold.core.model.article.ArticlePage
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.StandardTestDispatcher

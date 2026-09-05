@@ -1,25 +1,27 @@
-package com.lyf.composescaffold.feature.cart.data
+package com.lyf.composescaffold.core.data.article
 
 import com.lyf.composescaffold.core.data.coroutine.IoDispatcher
 import com.lyf.composescaffold.core.data.network.safeRequest
+import com.lyf.composescaffold.core.model.article.ArticlePage
+import com.lyf.composescaffold.core.model.article.WanApiResponse
+import com.lyf.composescaffold.core.model.article.WanArticleListResponse
 import com.lyf.composescaffold.core.model.network.NetworkError
 import com.lyf.composescaffold.core.model.network.NetworkResult
 import com.lyf.composescaffold.core.model.network.toResult
-import com.lyf.composescaffold.feature.cart.data.remote.ArticleListApi
-import javax.inject.Inject
-import javax.inject.Singleton
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.withContext
 import kotlinx.serialization.SerializationException
+import javax.inject.Inject
+import javax.inject.Singleton
 
-/** 文章数据契约；直接在 data 维护，不引入形式主义的 domain 层。 */
-internal interface ArticleRepository {
-    /** [page] 为 1 基页码，具体数据源的页码规则由实现负责转换。 */
+/** 文章数据仓储契约：收拢在 core:data，供所有业务 Feature 共享。 */
+interface ArticleRepository {
+    /** [page] 为 1 基页码。 */
     suspend fun loadPage(page: Int): Result<ArticlePage>
 }
 
 @Singleton
-internal class DefaultArticleRepository @Inject constructor(
+class DefaultArticleRepository @Inject constructor(
     private val api: ArticleListApi,
     @param:IoDispatcher private val ioDispatcher: CoroutineDispatcher,
 ) : ArticleRepository {
@@ -33,7 +35,6 @@ internal class DefaultArticleRepository @Inject constructor(
     }
 }
 
-/** 后端包结构属于当前业务；通用网络层只处理 HTTP、连接与反序列化异常。 */
 private fun <T : Any> NetworkResult<WanApiResponse<T>>.unwrapWanApiResponse(): NetworkResult<T> =
     when (this) {
         is NetworkResult.Failure -> this
@@ -55,7 +56,6 @@ private fun <T : Any> NetworkResult<WanApiResponse<T>>.unwrapWanApiResponse(): N
         }
     }
 
-/** 直接复用服务端数据模型构造业务分页载荷，零字段二次映射。 */
 private fun NetworkResult<WanArticleListResponse>.mapArticlePage(): NetworkResult<ArticlePage> =
     when (this) {
         is NetworkResult.Failure -> this
