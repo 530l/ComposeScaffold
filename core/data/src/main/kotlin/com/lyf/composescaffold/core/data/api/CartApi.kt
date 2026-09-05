@@ -1,4 +1,4 @@
-package com.lyf.composescaffold.core.data.article
+package com.lyf.composescaffold.core.data.api
 
 import com.lyf.composescaffold.core.model.article.WanApiResponse
 import com.lyf.composescaffold.core.model.article.WanArticleListResponse
@@ -7,9 +7,9 @@ import retrofit2.http.GET
 import retrofit2.http.Path
 
 /**
- * wanandroid 文章列表接口，按业务领域收拢在 core:data/article。
+ * 购物车相关 API 接口（按模块前缀命名，扁平存放在 core:data/api）。
  */
-interface ArticleListApi {
+interface CartApi {
     @GET("article/list/{page}/json")
     suspend fun getArticleList(
         @Path("page") page: Int,

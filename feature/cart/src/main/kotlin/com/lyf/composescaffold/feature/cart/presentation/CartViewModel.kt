@@ -8,7 +8,7 @@ import com.lyf.composescaffold.core.design.ui.loadmore.LoadableController
 import com.lyf.composescaffold.core.design.ui.loadmore.LoadableUiState
 import com.lyf.composescaffold.core.design.ui.loadmore.LoadMoreState
 import com.lyf.composescaffold.core.design.ui.loadmore.Page
-import com.lyf.composescaffold.core.data.article.ArticleRepository
+import com.lyf.composescaffold.core.data.repository.CartRepository
 import com.lyf.composescaffold.core.model.article.Article
 import com.lyf.composescaffold.core.model.article.ArticlePage
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -76,7 +76,7 @@ internal sealed interface CartEvent {
 
 @HiltViewModel
 internal class CartViewModel @Inject constructor(
-    private val repository: ArticleRepository,
+    private val repository: CartRepository,
 ) : ViewModel() {
     private val loadable: LoadableController<CartItemUiState, CartUiState> =
         LoadableController(

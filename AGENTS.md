@@ -30,7 +30,7 @@
 - 新增数据库 Entity：Entity/Dao 统一放入 `core:data` 对应的业务仓储包（如 `core/data/<domain>/local`），必须到 `app` 的
   `AppDatabase` 注册；Room 的 KSP 处理器只挂在 `app/build.gradle.kts`，schema 导出在 `app/schemas/`。
 - 改数据库结构 = 新版本号 + 提交 `app/schemas/` 下新 JSON + 写迁移，三件事一起做。
-- 业务数据模型统一放入 `core:model`（按领域包划分，如 `core.model.article.*`）；Retrofit 接口、本地数据源与 Repository 实现放入 `core:data`（按仓储包划分，如 `core.data.article.*`）。Feature 为纯展示层，ViewModel 直接注入 Repository 并消费业务 Model，免除机械透传 UseCase 与重复 DTO 映射。网络客户端复用 `core:data` 的 `NetworkFactory`，网络错误边界统一走 `core:model` 的 `NetworkResult`。
+- 业务数据模型统一放入 `core:model`（按领域包划分，如 `core.model.article.*`）；Retrofit 接口统一扁平放入 `core:data/api`（按模块前缀命名，如 `CartApi.kt`），Repository 契约与实现统一扁平放入 `core:data/repository`（按模块前缀命名，如 `CartRepository.kt`），不分子包。Feature 为纯展示层，ViewModel 直接注入 Repository 并消费业务 Model，免除机械透传 UseCase 与重复 DTO 映射。网络客户端复用 `core:data` 的 `NetworkFactory`，网络错误边界统一走 `core:model` 的 `NetworkResult`。
 
 ## 代码约定
 

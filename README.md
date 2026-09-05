@@ -33,8 +33,11 @@ compileSdk 37 / targetSdk 37 / minSdk 24；JVM 工具链：Gradle daemon JDK 22�
 app                         应用壳：五 Tab 壳、根导航、初始化、DI/Room 数据库聚合、发布配置
   ├── core:common           基础层（Android library、零 UI 依赖）：日志（AppLogger）、运行配置（AppConfig）
   ├── core:model            通用业务契约与模型底座（零外部框架/IO 依赖）：Money、NetworkResult、业务实体（如 Article）
-  ├── core:data             统一数据层与基础设施：按仓储领域划分包结构（如 article/、network/、storage/），承载 Retrofit API、
-  │                         Repository 实现、KeyValueStore (MMKV) / SecureCredentialStore、调度器与 DI 模块
+  ├── core:data             统一数据层与基础设施：
+  │                         - repository/（扁平存放各模块仓储契约与实现，用模块前缀区分，如 CartRepository.kt）
+  │                         - api/（扁平存放 Retrofit 接口，用模块前缀区分，如 CartApi.kt）
+  │                         - network/（网络工厂、Auth 拦截与 401 会话失效流）
+  │                         - storage/（KeyValueStore / SecureCredentialStore 硬件加密）
   ├── core:design           Compose 工具箱：主题、图片（AppImage/Coil）、刷新/加载更多组件族
   │                         （LoadableLazyColumn/LoadableController）、状态页与 Navigation 3 容器
   ├── feature:home          「首页」纯展示模块（独立 tab 与 EntryProvider）

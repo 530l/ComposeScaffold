@@ -1,5 +1,6 @@
-package com.lyf.composescaffold.core.data.article
+package com.lyf.composescaffold.core.data.repository
 
+import com.lyf.composescaffold.core.data.api.CartApi
 import com.lyf.composescaffold.core.data.coroutine.IoDispatcher
 import com.lyf.composescaffold.core.data.network.safeRequest
 import com.lyf.composescaffold.core.model.article.ArticlePage
@@ -14,17 +15,17 @@ import kotlinx.serialization.SerializationException
 import javax.inject.Inject
 import javax.inject.Singleton
 
-/** 文章数据仓储契约：收拢在 core:data，供所有业务 Feature 共享。 */
-interface ArticleRepository {
+/** 购物车数据仓储契约（按模块前缀命名，扁平存放在 core:data/repository）。 */
+interface CartRepository {
     /** [page] 为 1 基页码。 */
     suspend fun loadPage(page: Int): Result<ArticlePage>
 }
 
 @Singleton
-class DefaultArticleRepository @Inject constructor(
-    private val api: ArticleListApi,
+class DefaultCartRepository @Inject constructor(
+    private val api: CartApi,
     @param:IoDispatcher private val ioDispatcher: CoroutineDispatcher,
-) : ArticleRepository {
+) : CartRepository {
     override suspend fun loadPage(page: Int): Result<ArticlePage> = withContext(ioDispatcher) {
         require(page >= FIRST_PAGE) { "页码必须从 $FIRST_PAGE 开始" }
         safeRequest {
