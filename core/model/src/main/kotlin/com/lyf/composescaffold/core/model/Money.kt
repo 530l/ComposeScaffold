@@ -1,4 +1,4 @@
-package com.lyf.composescaffold.core.data.model
+package com.lyf.composescaffold.core.model
 
 enum class CurrencyCode(
     val symbol: String,

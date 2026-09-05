@@ -1,8 +1,8 @@
 package com.lyf.composescaffold.feature.cart.presentation
 
 import com.google.common.truth.Truth.assertThat
-import com.lyf.composescaffold.core.data.model.Money
-import com.lyf.composescaffold.core.data.util.formatMoney
+import com.lyf.composescaffold.core.model.Money
+import com.lyf.composescaffold.core.model.formatMoney
 import com.lyf.composescaffold.core.design.ui.loadmore.LoadMoreState
 import com.lyf.composescaffold.feature.cart.domain.Article
 import com.lyf.composescaffold.feature.cart.domain.ArticlePage

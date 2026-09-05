@@ -19,9 +19,10 @@
 
 ## 模块与依赖铁律
 
-- 依赖方向只允许 `app → {core:common, core:data, core:design, feature:*}`；
-  feature 只依赖三个 core 模块。core 内部只允许 `core:data / core:design → core:common` 单向，
-  禁止 core → app/feature（反向依赖）、feature 互相依赖、core:common 依赖任何兄弟模块。
+- 依赖方向只允许 `app → {core:common, core:model, core:data, core:design, feature:*}`；
+  feature 按需依赖四个 core 模块。`core:model` 为纯领域模型叶子底座（零项目依赖）；
+  `core:data / core:design` 允许单向依赖 `core:common` 与 `core:model`；
+  禁止 core → app/feature（反向依赖）、feature 互相依赖、core:model 依赖任何兄弟模块。
 - 底部 tab 的注册点是 `app/navigation/TopLevelTab.kt`（枚举持路由）+ `AppNavigation.kt` 的
   bottomBar；多返回栈机制在 `core:design/navigation/TabNavigation.kt`，切 tab 不清栈，
   各 tab 返回历史独立。登录等全局全屏流程走 `AppNavigation.kt` 的根栈，不塞进任一 tab 栈。
@@ -30,8 +31,7 @@
   `AppDatabase` 注册；Room 的 KSP 处理器只挂在 `app/build.gradle.kts`，schema 导出在
   `app/schemas/`。feature 模块内无法独立构造 DAO（DAO 实现类只在 `:app` 生成），属已知取舍。
 - 改数据库结构 = 新版本号 + 提交 `app/schemas/` 下新 JSON + 写迁移，三件事一起做。
-- Retrofit 接口放 feature 的 `data/remote`；网络客户端与错误边界复用 `core:data` 的
-  `NetworkFactory` / `NetworkResult`。
+- Retrofit 接口放 feature 的 `data/remote`；网络客户端复用 `core:data` 的 `NetworkFactory`，网络模型与错误边界复用 `core:model` 的 `NetworkResult`。
 
 ## 代码约定
 
@@ -46,7 +46,7 @@
 - 分页列表统一走 `core:design` 的 `core/ui/loadmore`：UiState 实现 `LoadableUiState`，
   `LoadableController` 负责页码、互斥去重与结束判定（`Page(items, hasMore)` 由调用方按
   后端 cursor/总数信号显式给出，不要用「返回条数 < pageSize」推断）。
-- 金额一律用 `core:data/model/Money`（最小货币单位 Long），展示用 `formatMoney`，禁止浮点。
+- 金额一律用 `core:model/Money`（最小货币单位 Long），展示用 `formatMoney`，禁止浮点。
 - 日志走 `core:common/log/AppLogger`，不直接依赖 Kermit；网络错误走 `NetworkResult` 边界，
   `CancellationException` 必须原样重抛。
 - 协程调度器一律注入 `@IoDispatcher` / `@DefaultDispatcher`（定义于 `core:data/coroutine`），

@@ -32,6 +32,7 @@ rootProject.name = "ComposeScaffold"
 
 include(":app")
 include(":core:common")
+include(":core:model")
 include(":core:data")
 include(":core:design")
 include(":feature:home")

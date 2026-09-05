@@ -1,9 +1,9 @@
 package com.lyf.composescaffold.feature.cart.data
 
-import com.lyf.composescaffold.core.data.network.NetworkError
-import com.lyf.composescaffold.core.data.network.NetworkResult
 import com.lyf.composescaffold.core.data.network.safeRequest
-import com.lyf.composescaffold.core.data.network.toResult
+import com.lyf.composescaffold.core.model.network.NetworkError
+import com.lyf.composescaffold.core.model.network.NetworkResult
+import com.lyf.composescaffold.core.model.network.toResult
 import com.lyf.composescaffold.feature.cart.data.remote.ArticleListApi
 import com.lyf.composescaffold.feature.cart.data.remote.WanApiResponse
 import com.lyf.composescaffold.feature.cart.data.remote.WanArticleListDto

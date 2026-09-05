@@ -3,7 +3,7 @@ package com.lyf.composescaffold.feature.cart.presentation
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.lyf.composescaffold.core.common.log.AppLogger
-import com.lyf.composescaffold.core.data.model.Money
+import com.lyf.composescaffold.core.model.Money
 import com.lyf.composescaffold.core.design.ui.loadmore.LoadableController
 import com.lyf.composescaffold.core.design.ui.loadmore.LoadableUiState
 import com.lyf.composescaffold.core.design.ui.loadmore.LoadMoreState

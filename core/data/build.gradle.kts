@@ -23,6 +23,7 @@ dependencies {
 
     detektPlugins(libs.detekt.formatting)
     implementation(project(":core:common"))
+    api(project(":core:model"))
 
     implementation(libs.kotlinx.coroutines.core)
     implementation(libs.kotlinx.serialization.json)

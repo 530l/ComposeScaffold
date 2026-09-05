@@ -41,7 +41,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.lyf.composescaffold.core.data.util.formatMoney
+import com.lyf.composescaffold.core.model.formatMoney
 import com.lyf.composescaffold.core.design.AppTheme
 import com.lyf.composescaffold.core.design.ui.event.ObserveAsEvents
 import com.lyf.composescaffold.core.design.ui.loadmore.LoadableLazyColumn

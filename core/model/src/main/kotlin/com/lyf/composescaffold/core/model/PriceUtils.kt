@@ -1,6 +1,4 @@
-package com.lyf.composescaffold.core.data.util
-
-import com.lyf.composescaffold.core.data.model.Money
+package com.lyf.composescaffold.core.model
 
 /** 不依赖平台 Locale 的稳定金额展示；接入多语言后可在 presentation 层替换 formatter。 */
 fun formatMoney(money: Money): String {
