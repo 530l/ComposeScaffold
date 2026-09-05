@@ -10,7 +10,7 @@ import com.lyf.composescaffold.core.design.ui.loadmore.LoadMoreState
 import com.lyf.composescaffold.core.design.ui.loadmore.Page
 import com.lyf.composescaffold.feature.cart.domain.Article
 import com.lyf.composescaffold.feature.cart.domain.ArticlePage
-import com.lyf.composescaffold.feature.cart.domain.GetArticleListUseCase
+import com.lyf.composescaffold.feature.cart.domain.ArticleRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
 import kotlinx.coroutines.channels.Channel
@@ -76,7 +76,7 @@ internal sealed interface CartEvent {
 
 @HiltViewModel
 internal class CartViewModel @Inject constructor(
-    private val getArticleListUseCase: GetArticleListUseCase,
+    private val repository: ArticleRepository,
 ) : ViewModel() {
     private val loadable: LoadableController<CartItemUiState, CartUiState> =
         LoadableController(
@@ -105,7 +105,7 @@ internal class CartViewModel @Inject constructor(
         } else {
             currentList.mapTo(mutableSetOf()) { it.article.id }
         }
-        return getArticleListUseCase(page).map { result: ArticlePage ->
+        return repository.loadPage(page).map { result: ArticlePage ->
             Page(
                 items = result.items
                     .distinctBy { it.id }

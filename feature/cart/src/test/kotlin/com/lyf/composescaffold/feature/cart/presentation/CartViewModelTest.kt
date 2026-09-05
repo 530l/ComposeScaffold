@@ -7,7 +7,6 @@ import com.lyf.composescaffold.core.design.ui.loadmore.LoadMoreState
 import com.lyf.composescaffold.feature.cart.domain.Article
 import com.lyf.composescaffold.feature.cart.domain.ArticlePage
 import com.lyf.composescaffold.feature.cart.domain.ArticleRepository
-import com.lyf.composescaffold.feature.cart.domain.GetArticleListUseCase
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.StandardTestDispatcher
@@ -34,7 +33,7 @@ class CartViewModelTest {
     }
 
     private fun createViewModel(repository: ArticleRepository): CartViewModel =
-        CartViewModel(GetArticleListUseCase(repository))
+        CartViewModel(repository)
 
     @Test
     fun formatMoneyUsesMinorUnits() {

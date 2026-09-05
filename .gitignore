@@ -5,6 +5,7 @@ local.properties
 
 # IDE 与工具本地状态（.idea 未入库，整目录忽略）
 .idea/
+.vscode/
 .kotlin/
 
 .DS_Store
