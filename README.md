@@ -32,8 +32,8 @@ compileSdk 37 / targetSdk 37 / minSdk 24；JVM 工具链：Gradle daemon JDK 22�
 ```text
 app                         应用壳：五 Tab 壳、根导航、初始化、DI/Room 数据库聚合、发布配置
   ├── core:common           基础层（Android library、零 UI 依赖）：日志（AppLogger）、运行配置（AppConfig）
-  ├── core:data             通用模型（Money/NetworkResult）、Retrofit/OkHttp 工厂、
-  │                         KeyValueStore 接口与 MMKV 实现、核心 DI 模块
+  ├── core:data             通用模型（Money/NetworkResult）、Retrofit/OkHttp 工厂（含 Auth 拦截与 401 会话失效流）、
+  │                         KeyValueStore (MMKV) / SecureCredentialStore (Android Keystore)、调度器与核心 DI 模块
   ├── core:design           Compose 工具箱：主题、图片（AppImage/Coil）、刷新/加载更多组件族
   │                         （LoadableLazyColumn/LoadableController）、状态页与 Navigation 3 容器
   ├── feature:home          「首页」独立 tab 与 EntryProvider
@@ -64,7 +64,7 @@ COMPOSE_SCAFFOLD_KEY_PASSWORD=replace_me
 
 不要把 API token、证书密码、签名私钥或真实生产密钥提交到仓库。未配置上述四项时 release 产物保持未签名，只用于本地 R8 验证，不能发布。
 
-`KeyValueStore` 的默认 MMKV 实现不加密，只能保存界面偏好、缓存标记等非敏感状态。登录 token、密码、支付凭证和个人敏感信息必须使用基于 Android Keystore 的独立凭证存储。
+`KeyValueStore` 的默认 MMKV 实现不加密，只能保存界面偏好、缓存标记等非敏感状态。登录 token、密码、支付凭证和个人敏感信息统一使用 `core:data` 的 `SecureCredentialStore`（基于 Android Keystore 硬件级 AES-256 GCM 加密，并内建 JVM 单测透明降级）。
 
 ## 数据库升级约定
 

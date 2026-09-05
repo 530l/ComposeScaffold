@@ -12,15 +12,19 @@ import com.lyf.composescaffold.feature.cart.domain.ArticlePage
 import com.lyf.composescaffold.feature.cart.domain.ArticleRepository
 import javax.inject.Inject
 import javax.inject.Singleton
+import com.lyf.composescaffold.core.data.coroutine.IoDispatcher
+import kotlinx.coroutines.CoroutineDispatcher
+import kotlinx.coroutines.withContext
 import kotlinx.serialization.SerializationException
 
 @Singleton
 internal class DefaultArticleRepository @Inject constructor(
     private val api: ArticleListApi,
+    @param:IoDispatcher private val ioDispatcher: CoroutineDispatcher,
 ) : ArticleRepository {
-    override suspend fun loadPage(page: Int): Result<ArticlePage> {
+    override suspend fun loadPage(page: Int): Result<ArticlePage> = withContext(ioDispatcher) {
         require(page >= FIRST_PAGE) { "页码必须从 $FIRST_PAGE 开始" }
-        return safeRequest {
+        safeRequest {
             api.getArticleList(page - FIRST_PAGE)
         }.unwrapWanApiResponse()
             .mapArticlePage()

@@ -49,8 +49,18 @@
 - 金额一律用 `core:data/model/Money`（最小货币单位 Long），展示用 `formatMoney`，禁止浮点。
 - 日志走 `core:common/log/AppLogger`，不直接依赖 Kermit；网络错误走 `NetworkResult` 边界，
   `CancellationException` 必须原样重抛。
-- 键值存储只注入 `core:data/storage/KeyValueStore` 接口，key 用业务模块的常量对象集中声明，
-  不在调用点写裸字符串；MMKV 是 Android native 实现，JVM 单测跑不了真实现，测试用内存 Fake。
+- 协程调度器一律注入 `@IoDispatcher` / `@DefaultDispatcher`（定义于 `core:data/coroutine`），
+  禁止在数据层、领域层硬编码使用裸 `Dispatchers.IO` / `Dispatchers.Default`，单测构造时通过参数传入 `StandardTestDispatcher`。
+- 键值与凭证存储强边界隔离：
+  - 非敏感偏好设置、缓存标记只注入 `core:data/storage/KeyValueStore` 接口（MMKV 实现）；
+  - Token、刷新令牌、密码和个人敏感信息一律注入 `core:data/storage/SecureCredentialStore` 接口
+    （Android Keystore AES-256 GCM 硬件加密实现），严禁明文存入 MMKV。
+- 网络认证与 401 登出链路：网络客户端由 `AuthInterceptor` 自动装配 `SecureCredentialStore` 的
+  Bearer Token；遇到 401 响应通过 `SessionEventManager` 广播，应用根导航集中监听并重定向至全屏登录页，
+  Feature 无需重复编写 401 拦截弹窗逻辑。
+- 领域层 UseCase 约定：简单单表或单接口操作，保持 ViewModel 直接调用 Repository，
+  禁止机械化堆叠仅有一行转发的透传式 UseCase（避免过度工程化）；仅在存在跨 Repository 聚合、
+  复用率高或包含核心商业计算规则时才抽取单职责 UseCase（遵循单一 `operator fun invoke`）。
 - Nav3 路由 `data object` 必须覆写 `toString()` 返回 `接口名.对象名`（如 `"CartRoute.Main"`）：
   导航宿主显式用 `key.toString()` 作 contentKey，是 saveable 状态（含滚动位置）与 entry 级
   ViewModelStore 的存取键；裸 `data object Main` 跨 feature 全叫 "Main"，会互相覆盖、

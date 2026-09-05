@@ -19,13 +19,19 @@ internal fun createJson(): Json = Json {
     encodeDefaults = true
 }
 
-internal fun createOkHttpClient(config: AppConfig): OkHttpClient = OkHttpClient.Builder()
+internal fun createOkHttpClient(
+    config: AppConfig,
+    authInterceptor: AuthInterceptor? = null,
+): OkHttpClient = OkHttpClient.Builder()
     .connectTimeout(CONNECT_TIMEOUT_MILLIS, TimeUnit.MILLISECONDS)
     .readTimeout(REQUEST_TIMEOUT_MILLIS, TimeUnit.MILLISECONDS)
     .writeTimeout(REQUEST_TIMEOUT_MILLIS, TimeUnit.MILLISECONDS)
     // 只保留 OkHttp 对连接失败的内建恢复；HTTP 状态码重试应由具体接口按幂等性决定。
     .retryOnConnectionFailure(true)
     .apply {
+        if (authInterceptor != null) {
+            addInterceptor(authInterceptor)
+        }
         if (config.enableNetworkLogging) {
             addInterceptor { chain ->
                 val request = chain.request()

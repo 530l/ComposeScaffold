@@ -17,7 +17,7 @@ import kotlinx.serialization.modules.SerializersModule
 
 /** 统一管理 Navigation 3 返回栈，Feature 不直接持有或修改 back stack。 */
 class AppNavigator internal constructor(
-    private val backStack: NavBackStack<NavKey>,
+    internal val backStack: NavBackStack<NavKey>,
 ) {
     val currentRoute: NavKey
         get() = backStack.last()
@@ -39,6 +39,21 @@ class AppNavigator internal constructor(
     }
 }
 
+/** 构造并记忆根级 [AppNavigator]。 */
+@Composable
+fun rememberAppNavigator(
+    startDestination: NavKey,
+    serializersModule: SerializersModule,
+): AppNavigator {
+    val savedStateConfiguration = remember(serializersModule) {
+        SavedStateConfiguration {
+            this.serializersModule = serializersModule
+        }
+    }
+    val backStack = rememberNavBackStack(savedStateConfiguration, startDestination)
+    return remember(backStack) { AppNavigator(backStack) }
+}
+
 /**
  * 应用级 Navigation 3 容器：负责跨平台状态恢复、返回栈和 Entry 级 ViewModel 生命周期。
  */
@@ -49,20 +64,29 @@ fun AppNavHost(
     modifier: Modifier = Modifier,
     entryProvider: EntryProviderScope<NavKey>.(navigator: AppNavigator) -> Unit,
 ) {
-    val routeSerializers = serializersModule
-    val savedStateConfiguration = remember(routeSerializers) {
-        SavedStateConfiguration {
-            this.serializersModule = routeSerializers
-        }
-    }
-    val backStack = rememberNavBackStack(savedStateConfiguration, startDestination)
-    val navigator = remember(backStack) { AppNavigator(backStack) }
+    val navigator = rememberAppNavigator(startDestination, serializersModule)
+    AppNavHost(
+        navigator = navigator,
+        modifier = modifier,
+        entryProvider = entryProvider,
+    )
+}
+
+/**
+ * 接收已存在的 [navigator] 实例的 [AppNavHost] 重载，便于在宿主层监听全局会话失效事件并控制导航。
+ */
+@Composable
+fun AppNavHost(
+    navigator: AppNavigator,
+    modifier: Modifier = Modifier,
+    entryProvider: EntryProviderScope<NavKey>.(navigator: AppNavigator) -> Unit,
+) {
     val baseProvider = navigationEntryProvider {
         entryProvider(navigator)
     }
 
     NavDisplay(
-        backStack = backStack,
+        backStack = navigator.backStack,
         modifier = modifier,
         onBack = { navigator.navigateBack() },
         transitionSpec = { forwardContentTransform() },

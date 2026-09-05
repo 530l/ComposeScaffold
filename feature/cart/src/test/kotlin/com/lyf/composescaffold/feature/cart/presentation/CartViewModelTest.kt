@@ -7,6 +7,7 @@ import com.lyf.composescaffold.core.design.ui.loadmore.LoadMoreState
 import com.lyf.composescaffold.feature.cart.domain.Article
 import com.lyf.composescaffold.feature.cart.domain.ArticlePage
 import com.lyf.composescaffold.feature.cart.domain.ArticleRepository
+import com.lyf.composescaffold.feature.cart.domain.GetArticleListUseCase
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.StandardTestDispatcher
@@ -32,6 +33,9 @@ class CartViewModelTest {
         Dispatchers.resetMain()
     }
 
+    private fun createViewModel(repository: ArticleRepository): CartViewModel =
+        CartViewModel(GetArticleListUseCase(repository))
+
     @Test
     fun formatMoneyUsesMinorUnits() {
         assertThat(formatMoney(Money(0))).isEqualTo("¥0.00")
@@ -42,7 +46,7 @@ class CartViewModelTest {
     @Test
     fun initialLoadShowsFirstPage() = runTest(dispatcher) {
         val repository = FakeArticleRepository { page -> successPage(page) }
-        val viewModel = CartViewModel(repository)
+        val viewModel = createViewModel(repository)
         advanceUntilIdle()
 
         val state = viewModel.uiState.value
@@ -62,7 +66,7 @@ class CartViewModelTest {
                 successPage(page)
             }
         }
-        val viewModel = CartViewModel(repository)
+        val viewModel = createViewModel(repository)
         advanceUntilIdle()
 
         assertThat(viewModel.uiState.value.error).isEqualTo(CartError.LOAD_FAILED)
@@ -78,7 +82,7 @@ class CartViewModelTest {
 
     @Test
     fun positionBasedTotalsAndSelectAll() = runTest(dispatcher) {
-        val viewModel = CartViewModel(FakeArticleRepository { page -> successPage(page) })
+        val viewModel = createViewModel(FakeArticleRepository { page -> successPage(page) })
         advanceUntilIdle()
 
         // 演示价 = position + 1（分）：选中第 0、1 条合计 1 + 2 = 3 分。
@@ -110,7 +114,7 @@ class CartViewModelTest {
             if (requestedPages.size == 1) successPage(page)
             else Result.failure(IllegalStateException("网络连接失败"))
         }
-        val viewModel = CartViewModel(repository)
+        val viewModel = createViewModel(repository)
         advanceUntilIdle()
 
         viewModel.onIntent(CartIntent.Refresh)
@@ -130,7 +134,7 @@ class CartViewModelTest {
                 successPage(page)
             }
         }
-        val viewModel = CartViewModel(repository)
+        val viewModel = createViewModel(repository)
         advanceUntilIdle()
         assertThat(viewModel.uiState.value.error).isEqualTo(CartError.LOAD_FAILED)
 
@@ -145,7 +149,7 @@ class CartViewModelTest {
     @Test
     fun loadMoreAppendsNextPageThenStopsAtEnd() = runTest(dispatcher) {
         val repository = FakeArticleRepository { page -> successPage(page) }
-        val viewModel = CartViewModel(repository)
+        val viewModel = createViewModel(repository)
         advanceUntilIdle()
 
         viewModel.onIntent(CartIntent.LoadMore)
@@ -171,7 +175,7 @@ class CartViewModelTest {
                 Result.success(ArticlePage(items = articles(listOf(2L, 5L, 5L, 6L)), hasMore = false))
             }
         }
-        val viewModel = CartViewModel(repository)
+        val viewModel = createViewModel(repository)
         advanceUntilIdle()
 
         viewModel.onIntent(CartIntent.LoadMore)

@@ -1,12 +1,16 @@
 package com.lyf.composescaffold.core.data.di
 
 import android.content.Context
+import com.lyf.composescaffold.core.common.config.AppConfig
+import com.lyf.composescaffold.core.data.network.AuthInterceptor
+import com.lyf.composescaffold.core.data.network.SessionEventManager
 import com.lyf.composescaffold.core.data.network.createJson
 import com.lyf.composescaffold.core.data.network.createOkHttpClient
 import com.lyf.composescaffold.core.data.network.createRetrofit
+import com.lyf.composescaffold.core.data.storage.AndroidKeyStoreCredentialStore
 import com.lyf.composescaffold.core.data.storage.KeyValueStore
 import com.lyf.composescaffold.core.data.storage.MmkvKeyValueStore
-import com.lyf.composescaffold.core.common.config.AppConfig
+import com.lyf.composescaffold.core.data.storage.SecureCredentialStore
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -31,7 +35,20 @@ object DataModule {
 
     @Provides
     @Singleton
-    fun provideOkHttpClient(config: AppConfig): OkHttpClient = createOkHttpClient(config)
+    fun provideAuthInterceptor(
+        secureCredentialStore: SecureCredentialStore,
+        sessionEventManager: SessionEventManager,
+    ): AuthInterceptor = AuthInterceptor(
+        tokenProvider = { secureCredentialStore.getAuthToken() },
+        sessionEventManager = sessionEventManager,
+    )
+
+    @Provides
+    @Singleton
+    fun provideOkHttpClient(
+        config: AppConfig,
+        authInterceptor: AuthInterceptor,
+    ): OkHttpClient = createOkHttpClient(config, authInterceptor)
 
     @Provides
     @Singleton
@@ -45,4 +62,9 @@ object DataModule {
     @Singleton
     fun provideKeyValueStore(@ApplicationContext context: Context): KeyValueStore =
         MmkvKeyValueStore(context)
+
+    @Provides
+    @Singleton
+    fun provideSecureCredentialStore(@ApplicationContext context: Context): SecureCredentialStore =
+        AndroidKeyStoreCredentialStore(context)
 }

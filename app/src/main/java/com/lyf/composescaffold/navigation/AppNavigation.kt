@@ -19,10 +19,13 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.clearAndSetSemantics
 import androidx.navigation3.runtime.NavKey
 import com.lyf.composescaffold.R
+import com.lyf.composescaffold.core.data.network.SessionEventManager
 import com.lyf.composescaffold.core.design.navigation.AppNavHost
 import com.lyf.composescaffold.core.design.navigation.TabAppNavHost
 import com.lyf.composescaffold.core.design.navigation.TabNavigator
+import com.lyf.composescaffold.core.design.navigation.rememberAppNavigator
 import com.lyf.composescaffold.core.design.navigation.rememberTabNavigator
+import com.lyf.composescaffold.core.design.ui.event.ObserveAsEvents
 import com.lyf.composescaffold.feature.browse.navigation.browseEntryProvider
 import com.lyf.composescaffold.feature.browse.navigation.browseNavigationSerializers
 import com.lyf.composescaffold.feature.cart.navigation.cartEntryProvider
@@ -67,12 +70,23 @@ private val topLevelTabs = TopLevelTab.entries.map { it.route }
 
 /** 应用根导航承载 Tab Shell 与登录、支付等全局全屏流程。 */
 @Composable
-fun AppNavigation() {
-    AppNavHost(
+fun AppNavigation(sessionEventManager: SessionEventManager? = null) {
+    val rootNavigator = rememberAppNavigator(
         startDestination = AppRoute.MainTabs,
         serializersModule = rootNavigationSerializers,
+    )
+
+    if (sessionEventManager != null) {
+        // 接收全局 401 会话过期事件，自动弹出全屏登录页。
+        ObserveAsEvents(sessionEventManager.sessionExpiredEvents) {
+            rootNavigator.navigate(LoginRoute.Main)
+        }
+    }
+
+    AppNavHost(
+        navigator = rootNavigator,
         modifier = Modifier.fillMaxSize(),
-    ) { rootNavigator ->
+    ) {
         entry<AppRoute.MainTabs> {
             MainTabNavigation(
                 onLogin = { rootNavigator.navigate(LoginRoute.Main) },
