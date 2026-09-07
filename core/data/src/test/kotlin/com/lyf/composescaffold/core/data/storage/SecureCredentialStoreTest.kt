@@ -26,7 +26,7 @@ class SecureCredentialStoreTest {
     }
 
     @Test
-    fun memoryFallbackStoreSavesAndRetrievesTokens() {
+    fun inMemoryTestDoubleSavesAndRetrievesTokens() {
         val store = InMemorySecureCredentialStore()
         assertThat(store.getAuthToken()).isNull()
 
@@ -41,33 +41,5 @@ class SecureCredentialStoreTest {
 
         store.clearAll()
         assertThat(store.getCredential("refresh_token")).isNull()
-    }
-}
-
-private class InMemorySecureCredentialStore : SecureCredentialStore {
-    private val map = mutableMapOf<String, String>()
-
-    override fun saveAuthToken(token: String) {
-        map["auth_token"] = token
-    }
-
-    override fun getAuthToken(): String? = map["auth_token"]
-
-    override fun clearAuthToken() {
-        map.remove("auth_token")
-    }
-
-    override fun saveCredential(key: String, value: String) {
-        map[key] = value
-    }
-
-    override fun getCredential(key: String): String? = map[key]
-
-    override fun removeCredential(key: String) {
-        map.remove(key)
-    }
-
-    override fun clearAll() {
-        map.clear()
     }
 }

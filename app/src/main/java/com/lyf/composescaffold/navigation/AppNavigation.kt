@@ -20,6 +20,7 @@ import androidx.compose.ui.semantics.clearAndSetSemantics
 import androidx.navigation3.runtime.NavKey
 import com.lyf.composescaffold.R
 import com.lyf.composescaffold.core.data.network.SessionEventManager
+import com.lyf.composescaffold.core.data.network.SessionState
 import com.lyf.composescaffold.core.design.navigation.AppNavHost
 import com.lyf.composescaffold.core.design.navigation.TabAppNavHost
 import com.lyf.composescaffold.core.design.navigation.TabNavigator
@@ -77,9 +78,11 @@ fun AppNavigation(sessionEventManager: SessionEventManager? = null) {
     )
 
     if (sessionEventManager != null) {
-        // 接收全局 401 会话过期事件，自动弹出全屏登录页。
-        ObserveAsEvents(sessionEventManager.sessionExpiredEvents) {
-            rootNavigator.navigate(LoginRoute.Main)
+        // StateFlow 在恢复到前台时重放状态；singleTop 避免重复压入登录页。
+        ObserveAsEvents(sessionEventManager.state) { state ->
+            if (state is SessionState.Expired) {
+                rootNavigator.navigate(LoginRoute.Main)
+            }
         }
     }
 

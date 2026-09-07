@@ -4,40 +4,29 @@ import android.content.Context
 import android.content.SharedPreferences
 import android.security.keystore.KeyGenParameterSpec
 import android.security.keystore.KeyProperties
-import com.lyf.composescaffold.core.common.log.AppLogger
 import java.security.KeyStore
 import javax.crypto.Cipher
 import javax.crypto.KeyGenerator
 import javax.crypto.SecretKey
 import javax.crypto.spec.GCMParameterSpec
-import javax.crypto.spec.SecretKeySpec
 
 /**
- * 基于 Android KeyStore (TEE / SE 硬件密钥库) 的敏感凭据安全存储实现。
- *
- * 安全机制：
- * 1. 根密钥保存在 AndroidKeyStore 硬件隔离区中，私钥不可导出；
- * 2. 采用 AES/GCM/NoPadding (256-bit) 认证加密，每次加密生成独立的随机 12 字节 IV；
- * 3. 密文与 IV 一同持久化于隔离 SharedPreferences，防止被窃取或离线篡改；
- * 4. 内置单元测试环境（无硬件 KeyStore 的纯 JVM 环境）安全降级，避免本地测试崩溃。
+ * 使用 Android Keystore 密钥进行 AES-256 GCM 加密，是否硬件保护由设备决定。
+ * 保留已有「12 字节 IV + 密文及认证标签」格式；失败显式报告，不自动降级。
+ * 同步操作须在工作线程调用，commit 成功后才报告持久化完成。
  */
-class AndroidKeyStoreCredentialStore(
-    context: Context,
-    prefName: String = DEFAULT_PREF_NAME,
-    private val keyAlias: String = DEFAULT_KEY_ALIAS,
+class AndroidKeyStoreCredentialStore internal constructor(
+    private val sharedPreferences: SharedPreferences,
+    private val keyProvider: () -> SecretKey,
 ) : SecureCredentialStore {
-
-    private val sharedPreferences: SharedPreferences =
-        context.getSharedPreferences(prefName, Context.MODE_PRIVATE)
-
-    private val isKeyStoreAvailable: Boolean = checkKeyStoreAvailability()
-    private val memoryFallbackStore = mutableMapOf<String, String>()
-
-    // 纯 JVM 单测环境下的备用软件密钥
-    private val fallbackSoftwareKey: SecretKey by lazy {
-        val keyBytes = ByteArray(32) { (it * 31 + 7).toByte() }
-        SecretKeySpec(keyBytes, "AES")
-    }
+    constructor(
+        context: Context,
+        prefName: String = DEFAULT_PREF_NAME,
+        keyAlias: String = DEFAULT_KEY_ALIAS,
+    ) : this(
+        context.getSharedPreferences(prefName, Context.MODE_PRIVATE),
+        { getOrCreateSecretKey(keyAlias) },
+    )
 
     override fun saveAuthToken(token: String) {
         saveCredential(KEY_AUTH_TOKEN, token)
@@ -49,95 +38,53 @@ class AndroidKeyStoreCredentialStore(
         removeCredential(KEY_AUTH_TOKEN)
     }
 
-    override fun saveCredential(key: String, value: String) {
-        if (!isKeyStoreAvailable) {
-            memoryFallbackStore[key] = value
-            return
-        }
-        try {
-            val encryptedBase64 = encrypt(value)
-            sharedPreferences.edit().putString(key, encryptedBase64).apply()
-        } catch (error: Exception) {
-            AppLogger.error(TAG, error) { "加密安全凭据失败: $key" }
-        }
+    @Synchronized
+    override fun saveCredential(key: String, value: String): Unit = credentialOperation {
+        val encryptedBase64 = encrypt(value)
+        check(sharedPreferences.edit().putString(key, encryptedBase64).commit()) { "凭据写入磁盘失败" }
     }
 
-    override fun getCredential(key: String): String? {
-        if (!isKeyStoreAvailable) {
-            return memoryFallbackStore[key]
-        }
-        val encryptedBase64 = sharedPreferences.getString(key, null) ?: return null
-        return try {
-            decrypt(encryptedBase64)
-        } catch (error: Exception) {
-            AppLogger.error(TAG, error) { "解密安全凭据失败: $key" }
-            null
-        }
+    @Synchronized
+    override fun getCredential(key: String): String? = credentialOperation {
+        sharedPreferences.getString(key, null)?.let(::decrypt)
     }
 
-    override fun removeCredential(key: String) {
-        memoryFallbackStore.remove(key)
-        sharedPreferences.edit().remove(key).apply()
+    @Synchronized
+    override fun removeCredential(key: String): Unit = credentialOperation {
+        check(sharedPreferences.edit().remove(key).commit()) { "凭据删除失败" }
     }
 
-    override fun clearAll() {
-        memoryFallbackStore.clear()
-        sharedPreferences.edit().clear().apply()
+    @Synchronized
+    override fun clearAll(): Unit = credentialOperation {
+        check(sharedPreferences.edit().clear().commit()) { "凭据清理失败" }
     }
 
     private fun encrypt(plaintext: String): String {
         val cipher = Cipher.getInstance(TRANSFORMATION)
-        val secretKey = getOrCreateSecretKey()
-        cipher.init(Cipher.ENCRYPT_MODE, secretKey)
-        val iv = cipher.iv
+        cipher.init(Cipher.ENCRYPT_MODE, keyProvider())
+        check(cipher.iv.size == GCM_IV_LENGTH) { "不支持的 GCM IV 长度" }
         val ciphertext = cipher.doFinal(plaintext.toByteArray(Charsets.UTF_8))
-        val combined = ByteArray(iv.size + ciphertext.size)
-        System.arraycopy(iv, 0, combined, 0, iv.size)
-        System.arraycopy(ciphertext, 0, combined, iv.size, ciphertext.size)
-        return SimpleBase64.encode(combined)
+        return SimpleBase64.encode(cipher.iv + ciphertext)
     }
 
     private fun decrypt(encryptedBase64: String): String {
         val combined = SimpleBase64.decode(encryptedBase64)
-        require(combined.size > GCM_IV_LENGTH) { "无效的加密凭据数据" }
-        val iv = ByteArray(GCM_IV_LENGTH)
-        val ciphertext = ByteArray(combined.size - GCM_IV_LENGTH)
-        System.arraycopy(combined, 0, iv, 0, GCM_IV_LENGTH)
-        System.arraycopy(combined, GCM_IV_LENGTH, ciphertext, 0, ciphertext.size)
-
+        require(combined.size >= GCM_IV_LENGTH + GCM_TAG_LENGTH_BITS / 8) { "无效的加密凭据数据" }
+        val iv = combined.copyOfRange(0, GCM_IV_LENGTH)
+        val ciphertext = combined.copyOfRange(GCM_IV_LENGTH, combined.size)
         val cipher = Cipher.getInstance(TRANSFORMATION)
-        val spec = GCMParameterSpec(GCM_TAG_LENGTH_BITS, iv)
-        cipher.init(Cipher.DECRYPT_MODE, getOrCreateSecretKey(), spec)
-        val decryptedBytes = cipher.doFinal(ciphertext)
-        return String(decryptedBytes, Charsets.UTF_8)
+        cipher.init(Cipher.DECRYPT_MODE, keyProvider(), GCMParameterSpec(GCM_TAG_LENGTH_BITS, iv))
+        return String(cipher.doFinal(ciphertext), Charsets.UTF_8)
     }
 
-    private fun getOrCreateSecretKey(): SecretKey {
-        if (!isKeyStoreAvailable) return fallbackSoftwareKey
-        val keyStore = KeyStore.getInstance(ANDROID_KEY_STORE).apply { load(null) }
-        if (!keyStore.containsAlias(keyAlias)) {
-            val keyGenerator = KeyGenerator.getInstance(
-                KeyProperties.KEY_ALGORITHM_AES,
-                ANDROID_KEY_STORE,
-            )
-            val parameterSpec = KeyGenParameterSpec.Builder(
-                keyAlias,
-                KeyProperties.PURPOSE_ENCRYPT or KeyProperties.PURPOSE_DECRYPT,
-            )
-                .setBlockModes(KeyProperties.BLOCK_MODE_GCM)
-                .setEncryptionPaddings(KeyProperties.ENCRYPTION_PADDING_NONE)
-                .setKeySize(AES_KEY_SIZE_BITS)
-                .build()
-            keyGenerator.init(parameterSpec)
-            return keyGenerator.generateKey()
-        }
-        val entry = keyStore.getEntry(keyAlias, null) as? KeyStore.SecretKeyEntry
-            ?: error("KeyStore 密钥条目格式不匹配: $keyAlias")
-        return entry.secretKey
+    private fun <T> credentialOperation(block: () -> T): T = try {
+        block()
+    } catch (error: Exception) {
+        // 异常消息不携带凭据名称或内容，调用方也不得直接记录原始 cause。
+        throw CredentialStorageException("安全凭据存储操作失败", error)
     }
 
     private companion object {
-        const val TAG = "SecureCredentialStore"
         const val DEFAULT_PREF_NAME = "secure_credentials_store"
         const val DEFAULT_KEY_ALIAS = "compose_scaffold_keystore_alias"
         const val KEY_AUTH_TOKEN = "auth_token_key"
@@ -147,17 +94,32 @@ class AndroidKeyStoreCredentialStore(
         const val GCM_TAG_LENGTH_BITS = 128
         const val AES_KEY_SIZE_BITS = 256
 
-        fun checkKeyStoreAvailability(): Boolean = try {
-            KeyStore.getInstance(ANDROID_KEY_STORE).apply { load(null) }
-            true
-        } catch (_: Throwable) {
-            false
+        /** 多个存储实例共享同一别名时，串行创建密钥，避免互相覆盖。 */
+        @Synchronized
+        fun getOrCreateSecretKey(keyAlias: String): SecretKey {
+            val keyStore = KeyStore.getInstance(ANDROID_KEY_STORE).apply { load(null) }
+            if (!keyStore.containsAlias(keyAlias)) {
+                val keyGenerator = KeyGenerator.getInstance(KeyProperties.KEY_ALGORITHM_AES, ANDROID_KEY_STORE)
+                val parameterSpec = KeyGenParameterSpec.Builder(
+                    keyAlias,
+                    KeyProperties.PURPOSE_ENCRYPT or KeyProperties.PURPOSE_DECRYPT,
+                )
+                    .setBlockModes(KeyProperties.BLOCK_MODE_GCM)
+                    .setEncryptionPaddings(KeyProperties.ENCRYPTION_PADDING_NONE)
+                    .setKeySize(AES_KEY_SIZE_BITS)
+                    .build()
+                keyGenerator.init(parameterSpec)
+                return keyGenerator.generateKey()
+            }
+            val entry = keyStore.getEntry(keyAlias, null) as? KeyStore.SecretKeyEntry
+                ?: error("KeyStore 密钥条目格式不匹配")
+            return entry.secretKey
         }
     }
 }
 
 /**
- * 纯 Kotlin 跨平台安全 Base64 实现，避免 Android 与 JVM 单测对 Base64 运行期的差异。
+ * 兼容已有密文格式的 Base64 编解码；严格拒绝损坏的输入。
  */
 internal object SimpleBase64 {
     private const val TABLE = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/"
@@ -184,7 +146,10 @@ internal object SimpleBase64 {
     }
 
     fun decode(str: String): ByteArray {
-        val clean = str.filter { it in TABLE || it == '=' }
+        require(str.length % 4 == 0) { "无效的 Base64 长度" }
+        val content = str.trimEnd('=')
+        require(str.length - content.length <= 2 && content.all { it in TABLE }) { "无效的 Base64 字符" }
+        val clean = str
         val output = mutableListOf<Byte>()
         var i = 0
         while (i < clean.length) {

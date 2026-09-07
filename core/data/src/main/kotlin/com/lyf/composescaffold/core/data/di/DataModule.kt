@@ -2,6 +2,8 @@ package com.lyf.composescaffold.core.data.di
 
 import android.content.Context
 import com.lyf.composescaffold.core.common.config.AppConfig
+import com.lyf.composescaffold.core.data.network.ApiHttpClient
+import com.lyf.composescaffold.core.data.network.PublicHttpClient
 import com.lyf.composescaffold.core.data.network.AuthInterceptor
 import com.lyf.composescaffold.core.data.network.SessionEventManager
 import com.lyf.composescaffold.core.data.network.createJson
@@ -17,6 +19,7 @@ import dagger.hilt.InstallIn
 import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
 import kotlinx.serialization.json.Json
+import okhttp3.HttpUrl.Companion.toHttpUrl
 import okhttp3.OkHttpClient
 import retrofit2.Retrofit
 import javax.inject.Singleton
@@ -36,25 +39,32 @@ object DataModule {
     @Provides
     @Singleton
     fun provideAuthInterceptor(
-        secureCredentialStore: SecureCredentialStore,
+        config: AppConfig,
         sessionEventManager: SessionEventManager,
     ): AuthInterceptor = AuthInterceptor(
-        tokenProvider = { secureCredentialStore.getAuthToken() },
+        apiBaseUrl = config.apiBaseUrl.toHttpUrl(),
+        tokenProvider = sessionEventManager::getAuthToken,
         sessionEventManager = sessionEventManager,
     )
 
     @Provides
     @Singleton
-    fun provideOkHttpClient(
-        config: AppConfig,
+    @PublicHttpClient
+    fun providePublicOkHttpClient(config: AppConfig): OkHttpClient = createOkHttpClient(config)
+
+    @Provides
+    @Singleton
+    @ApiHttpClient
+    fun provideApiOkHttpClient(
+        @PublicHttpClient publicClient: OkHttpClient,
         authInterceptor: AuthInterceptor,
-    ): OkHttpClient = createOkHttpClient(config, authInterceptor)
+    ): OkHttpClient = publicClient.newBuilder().addInterceptor(authInterceptor).build()
 
     @Provides
     @Singleton
     fun provideRetrofit(
         config: AppConfig,
-        okHttpClient: OkHttpClient,
+        @ApiHttpClient okHttpClient: OkHttpClient,
         json: Json,
     ): Retrofit = createRetrofit(config, okHttpClient, json)
 

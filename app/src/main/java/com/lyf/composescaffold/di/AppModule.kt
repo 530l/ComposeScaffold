@@ -6,6 +6,7 @@ import coil3.ImageLoader
 import com.lyf.composescaffold.BuildConfig
 import com.lyf.composescaffold.core.common.config.AppConfig
 import com.lyf.composescaffold.core.common.config.AppEnvironment
+import com.lyf.composescaffold.core.data.network.PublicHttpClient
 import com.lyf.composescaffold.core.design.image.createAppImageLoader
 import com.lyf.composescaffold.data.AppDatabase
 import dagger.Module
@@ -42,11 +43,11 @@ object AppModule {
             "compose_scaffold.db",
         ).build()
 
-    /** 图片加载器进程单例：复用网络栈共享的 OkHttpClient，OkHttpClient 不越过此层暴露给 UI。 */
+    /** 图片加载器进程单例：使用无认证客户端，避免向图片域名发送业务凭据。 */
     @Provides
     @Singleton
     fun provideImageLoader(
         @ApplicationContext context: Context,
-        okHttpClient: OkHttpClient,
+        @PublicHttpClient okHttpClient: OkHttpClient,
     ): ImageLoader = createAppImageLoader(context, okHttpClient)
 }
