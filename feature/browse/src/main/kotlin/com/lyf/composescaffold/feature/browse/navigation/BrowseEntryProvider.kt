@@ -8,23 +8,26 @@ import kotlinx.serialization.modules.SerializersModule
 import kotlinx.serialization.modules.polymorphic
 import kotlinx.serialization.modules.subclass
 
-/** 逛模块只暴露路由和 EntryProvider，跨模块跳转由应用组合层连接。 */
+/** 浏览业务模块对外公开的导航契约与节点装配入口（BrowseEntryProvider）。 */
 @Serializable
 sealed interface BrowseRoute : NavKey {
+    /** 浏览模块根路由节点。 */
     @Serializable
     data object Main : BrowseRoute {
         override fun toString(): String = "BrowseRoute.Main"
     }
 }
 
+/** 浏览模块导航序列化注册表，用于 Nav3 进程重建与跨页面跳转状态保存。 */
 val browseNavigationSerializers = SerializersModule {
     polymorphic(NavKey::class) {
         subclass(BrowseRoute.Main::class, BrowseRoute.Main.serializer())
     }
 }
 
-fun EntryProviderScope<NavKey>.browseEntryProvider() {
+/** 向宿主应用导航栈提供 Browse 模块的视图渲染节点。 */
+fun EntryProviderScope<NavKey>.browseEntryProvider(playbackVisible: () -> Boolean = { true }) {
     entry<BrowseRoute.Main> {
-        BrowseScreen()
+        BrowseScreen(playbackVisible = playbackVisible())
     }
 }

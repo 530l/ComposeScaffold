@@ -1,5 +1,40 @@
-<?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="browse_title">逛</string>
-    <string name="browse_placeholder">逛模块已接入独立返回栈，可在此承载分类、搜索与内容流。</string>
+    <string name="feed_music">音乐</string>
+    <string name="feed_mv">MV</string>
+    <string name="feed_mixed">混合</string>
+    <string name="feed_refresh">刷新推荐</string>
+    <string name="feed_retry">重试</string>
+    <string name="feed_empty">暂时没有这类作品</string>
+    <string name="feed_load_failed">暂时无法加载作品</string>
+    <string name="feed_load_failed_retry">加载失败，点击重试</string>
+    <string name="feed_interaction_failed">本地保存失败，点击关闭后重试</string>
+    <string name="feed_source_museai">MuseAI 本地作品样本 · 模拟分页</string>
+    <string name="feed_source_public">MuseAI 公开作品样本 · 模拟分页</string>
+    <string name="feed_loading_more">正在加载更多作品…</string>
+    <string name="feed_end">已经看完这些作品</string>
+    <string name="feed_untitled">未命名作品</string>
+    <string name="feed_unknown_artist">未知创作者</string>
+    <string name="feed_like">喜欢</string>
+    <string name="feed_save">收藏</string>
+    <string name="feed_comment">评论</string>
+    <string name="feed_share">分享</string>
+    <string name="feed_play">播放</string>
+    <string name="feed_pause">暂停</string>
+    <string name="feed_progress">播放进度</string>
+    <string name="feed_playback_failed">播放失败（%1$d）</string>
+    <string name="feed_swipe_next">可以继续上滑，播放下一条</string>
+    <string name="feed_lyrics">歌词</string>
+    <string name="feed_no_lyrics">暂无歌词 · 听见此刻</string>
+    <string name="feed_instrumental">纯音乐 · 感受旋律</string>
+    <string name="feed_demo_interaction">这是本地 Feed 演示，暂未接入真实评论和分享。喜欢与收藏会保存在此设备。</string>
+    <string name="feed_close">知道了</string>
+    <string name="feed_waiting_duration">正在读取时长</string>
+    <string name="feed_seek_unavailable">此作品暂不支持拖动</string>
+    <string name="feed_playback_channel">后台播放</string>
+    <string name="feed_playback_notification">正在提供后台播放服务</string>
+    <string name="feed_music_count">精选曲目 · %1$d 首</string>
+    <string name="feed_play_loaded">播放已加载歌曲</string>
+    <string name="feed_music_radar">今日音乐雷达</string>
+    <string name="feed_recommended_playlist">推荐歌单</string>
 </resources>

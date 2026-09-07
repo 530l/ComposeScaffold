@@ -117,6 +117,7 @@ internal class CartViewModel @Inject constructor(
                         )
                     },
                 hasMore = result.hasMore,
+                sourceItemCount = result.items.size,
             )
         }.onSuccess {
             loadable.updateState { state -> state.copy(error = null) }

@@ -21,6 +21,7 @@
 | Room | 2.8.4 | schema 导出至 `app/schemas/` |
 | MMKV | 2.4.2 | 非敏感键值存储（`KeyValueStore` 接口封装） |
 | Coil | 3.5.0 | coil-compose + coil-network-okhttp（3.6.0 为 Kotlin 2.4 元数据，不可用） |
+| Media3 | 1.11.0 | ExoPlayer / Compose UI / OkHttp DataSource / HLS / Database / Session，统一封装在 `core:player` |
 | Kermit | 2.1.0 | 统一日志门面（业务不直接依赖） |
 | detekt | 1.23.8 | 静态检查 + detekt-formatting |
 | 测试 | JUnit 4.13.2 / Truth 1.4.5 / AndroidX Test | |
@@ -38,17 +39,18 @@ app                         应用壳：五 Tab 壳、根导航、初始化、DI
   │                         - api/（扁平存放 Retrofit 接口，用模块前缀区分，如 CartApi.kt）
   │                         - network/（网络工厂、Auth 拦截与 401 会话失效流）
   │                         - storage/（KeyValueStore / SecureCredentialStore 硬件加密）
+  ├── core:player           可复用 Media3 封装：播放器接口、播放器池、缓存、视频输出与系统会话（见 core/player/README.md）
   ├── core:design           Compose 工具箱：主题、图片（AppImage/Coil）、刷新/加载更多组件族
   │                         （LoadableLazyColumn/LoadableController）、状态页与 Navigation 3 容器
   ├── feature:home          「首页」纯展示模块（独立 tab 与 EntryProvider）
-  ├── feature:browse        「逛」纯展示模块（独立 tab 与 EntryProvider）
+  ├── feature:browse        「逛」音乐 / MV / 混合 Feed（Compose Pager、Media3、模拟分页）
   ├── feature:message       「消息」纯展示模块（独立 tab 与 EntryProvider）
   ├── feature:cart          「购物车」纯展示模块（MVI 单向流 + 列表状态机，直接注入 core:data 仓储并消费 core:model 模型）
   ├── feature:mine          「我的」纯展示模块（独立 tab 与 EntryProvider）
   └── feature:login         根级全屏登录骨架、路由与 EntryProvider
 ```
 
-- 依赖方向：`app → core/feature`；feature 按需依赖四个 core；core 内部 `core:model` 为零依赖纯叶子底座，`core:data / core:design` 单向依赖 `core:model` 与 `core:common`；禁止 core → app/feature（反向依赖）、feature 互相依赖。
+- 依赖方向：`app → core/feature`；feature 按需依赖 core 模块；core 内部 `core:model` 为零依赖纯叶子底座，`core:data / core:design` 单向依赖 `core:model` 与 `core:common`；`core:player` 仅依赖 `core:common`，不依赖 Feed 模型；禁止 core → app/feature（反向依赖）、feature 互相依赖。
 - 模型与状态约定：
   - `core:model` 存放所有 API 服务端返回的数据模型及全局值对象；
   - 各 Feature 独有的界面交互状态（选中、展开、草稿等）保留在 Feature 内部的 `UiState` 中，通过「组合（Composition）」直接包裹 `core:model` 实体，免除冗余 DTO 与机械映射；
@@ -99,5 +101,7 @@ CI 在 `.github/workflows/ci.yml`：push/PR 触发，JDK 22（Temurin）+ Gradle
 - Android 数据安全表单、商店隐私声明与权限最小化审查。
 - 按实际接入的业务 SDK 补齐 R8 规则，并建设签名发布流水线与渠道打包方案。
 - 按发布地区完成第三方许可证、税务、支付、无障碍和合规审查。
+
+「逛」已实现默认混合流，可切换纯音乐和纯 MV；保留五 Tab 导航。数据来源、播放器边界、本地采样配置和未执行的验收场景见 [Feed 实现说明](docs/feed.md)。
 
 第三方组件及许可证摘要见 [THIRD_PARTY_NOTICES.md](./THIRD_PARTY_NOTICES.md)。

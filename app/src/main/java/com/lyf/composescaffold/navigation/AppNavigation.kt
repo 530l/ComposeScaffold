@@ -2,6 +2,7 @@ package com.lyf.composescaffold.navigation
 
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
+import com.lyf.composescaffold.ui.player.GlobalMiniPlayer
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Email
 import androidx.compose.material.icons.filled.Home
@@ -28,6 +29,7 @@ import com.lyf.composescaffold.core.design.navigation.rememberAppNavigator
 import com.lyf.composescaffold.core.design.navigation.rememberTabNavigator
 import com.lyf.composescaffold.core.design.ui.event.ObserveAsEvents
 import com.lyf.composescaffold.feature.browse.navigation.browseEntryProvider
+import com.lyf.composescaffold.feature.browse.navigation.BrowseRoute
 import com.lyf.composescaffold.feature.browse.navigation.browseNavigationSerializers
 import com.lyf.composescaffold.feature.cart.navigation.cartEntryProvider
 import com.lyf.composescaffold.feature.cart.navigation.cartNavigationSerializers
@@ -93,6 +95,7 @@ fun AppNavigation(sessionEventManager: SessionEventManager? = null) {
         entry<AppRoute.MainTabs> {
             MainTabNavigation(
                 onLogin = { rootNavigator.navigate(LoginRoute.Main) },
+                rootVisible = { rootNavigator.currentRoute == AppRoute.MainTabs },
             )
         }
         loginEntryProvider {
@@ -103,7 +106,7 @@ fun AppNavigation(sessionEventManager: SessionEventManager? = null) {
 
 /** 五个顶层业务入口各自持有返回栈，切换 Tab 不会清理其他 Tab 的页面状态。 */
 @Composable
-private fun MainTabNavigation(onLogin: () -> Unit) {
+private fun MainTabNavigation(onLogin: () -> Unit, rootVisible: () -> Boolean) {
     val navigator = rememberTabNavigator(topLevelTabs, mainTabsSerializers)
     val isTabRoot = navigator.currentRoute in topLevelTabs
     val isHomeRoot = navigator.currentTabIndex == 0 && isTabRoot
@@ -114,23 +117,34 @@ private fun MainTabNavigation(onLogin: () -> Unit) {
         onNavigateHome = { navigator.switchTab(topLevelTabs.first()) },
     )
 
-    // 底栏常驻底层以稳定页面几何；二级页面出现时禁用其交互和无障碍语义。
+    // 底栏与全局迷你播放器常驻于底部，跨全部 Tab 保持可见与交互。
     Box(modifier = Modifier.fillMaxSize()) {
-        AppBottomBar(
-            navigator = navigator,
-            enabled = isTabRoot,
-            modifier = Modifier.align(Alignment.BottomCenter),
-        )
         TabAppNavHost(
             navigator = navigator,
             modifier = Modifier.fillMaxSize(),
         ) { _ ->
             homeEntryProvider()
-            browseEntryProvider()
+            browseEntryProvider(
+                playbackVisible = {
+                    rootVisible() && navigator.currentTab == BrowseRoute.Main &&
+                        navigator.currentRoute == BrowseRoute.Main
+                },
+            )
             messageEntryProvider()
             cartEntryProvider { _ -> onLogin() }
             mineEntryProvider()
         }
+
+        AppBottomBar(
+            navigator = navigator,
+            enabled = isTabRoot,
+            modifier = Modifier.align(Alignment.BottomCenter),
+        )
+
+        GlobalMiniPlayer(
+            visibleInCurrentTab = true,
+            modifier = Modifier.fillMaxSize(),
+        )
     }
 }
 

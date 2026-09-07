@@ -10,6 +10,7 @@
 | AndroidX Lifecycle / Navigation 3 / Activity / Core Ktx / Splashscreen / Room | 生命周期、导航、数据库 | Apache-2.0 |
 | Dagger Hilt（含 hilt-navigation-compose） | 依赖注入 | Apache-2.0 |
 | Retrofit（含 converter-kotlinx-serialization） | 声明式 HTTP 客户端 | Apache-2.0 |
+| AndroidX Media3（ExoPlayer / Compose UI / HLS / OkHttp DataSource / Database） | Feed 音乐与 MV 播放、缓存 | Apache-2.0 |
 | OkHttp | 网络传输 | Apache-2.0 |
 | MMKV（com.tencent:mmkv） | 键值存储 | BSD 3-Clause |
 | Coil | 图片加载 | Apache-2.0 |

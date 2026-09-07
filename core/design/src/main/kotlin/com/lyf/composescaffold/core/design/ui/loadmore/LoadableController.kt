@@ -3,6 +3,8 @@ package com.lyf.composescaffold.core.design.ui.loadmore
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.currentCoroutineContext
+import kotlinx.coroutines.ensureActive
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -35,10 +37,11 @@ interface LoadableUiState<T, S : LoadableUiState<T, S>> {
  * - 首页加载进行中（初始化、刷新或静默刷新，含本地数据已先行展示的窗口）：加载更多被忽略；
  * - 刷新进行中（含不亮指示器的 silent 刷新）：重复刷新被忽略；
  * - 加载更多进行中：重复触发被忽略；
- * - 新刷新会取消进行中的加载更多并重置页码与结束标记；
- * - 到达最后一页（[LoadMoreState.End]）后加载更多短路，刷新时重置。
+ * - 新刷新会取消进行中的加载更多，成功后再提交新页码与结束标记；
+ * - 到达最后一页（[LoadMoreState.End]）后加载更多短路，刷新成功时重置。
  *
- * 防御规则：某页返回空列表时直接判定结束，避免触底检测反复请求造成死循环。
+ * 防御规则：服务端原始空页判定结束；过滤后无新增项时最多连续读取三页，随后进入可重试失败。
+ * 所有入口由同一 UI 线程调用；请求的 IO 调度由 loader 负责。
  *
  * [onError] 负责错误分层：`isListEmpty` 为 true 时适合整页错误占位，
  * 否则适合非阻断提示（banner/snackbar）。展示文案由 feature 的资源提供。
@@ -59,7 +62,7 @@ class LoadableController<T, S : LoadableUiState<T, S>>(
     private var refreshJob: Job? = null
     private var loadMoreJob: Job? = null
 
-    /** 已到最后一页；与 UiState 的 [LoadMoreState.End] 同步，刷新时重置。 */
+    /** 已到最后一页；与 UiState 的 [LoadMoreState.End] 同步，刷新成功时重置。 */
     private var reachEnd = false
 
     /** 下一次加载更多请求的页码。 */
@@ -93,7 +96,7 @@ class LoadableController<T, S : LoadableUiState<T, S>>(
                 // 本地数据只是过渡展示，失败时静默降级为无本地数据，远端结果才是最终状态；
                 // 协程取消必须原样上抛。
                 val items = try {
-                    local()
+                    local().also { currentCoroutineContext().ensureActive() }
                 } catch (error: CancellationException) {
                     throw error
                 } catch (error: Exception) {
@@ -118,7 +121,9 @@ class LoadableController<T, S : LoadableUiState<T, S>>(
         if (_uiState.value.isRefreshing || refreshJob?.isActive == true) return
         initializeJob?.cancel()
         loadMoreJob?.cancel()
-        reachEnd = false
+        val previousLoadMoreState = _uiState.value.loadMoreState.let { state ->
+            if (state == LoadMoreState.Loading) LoadMoreState.Idle else state
+        }
         _uiState.update {
             it.copyState(
                 isRefreshing = !silent,
@@ -129,7 +134,11 @@ class LoadableController<T, S : LoadableUiState<T, S>>(
         refreshJob = scope.launch {
             loadPageSafely(FIRST_PAGE).fold(
                 onSuccess = ::applyRefreshPage,
-                onFailure = ::applyLoadFailure,
+                onFailure = { error ->
+                    // 刷新失败时列表、页码、末页标记仍属于同一批数据。
+                    _uiState.update { it.copyState(loadMoreState = previousLoadMoreState) }
+                    applyLoadFailure(error)
+                },
             )
         }
     }
@@ -146,10 +155,10 @@ class LoadableController<T, S : LoadableUiState<T, S>>(
         loadMoreJob?.cancel()
         _uiState.update { it.copyState(loadMoreState = LoadMoreState.Loading) }
         loadMoreJob = scope.launch {
-            loadPageSafely(nextPage).fold(
+            loadNextPageWithNewItems().fold(
                 onSuccess = { page ->
-                    reachEnd = !page.hasMore || page.items.isEmpty()
-                    if (!reachEnd) nextPage += 1
+                    reachEnd = !page.hasMore || page.sourceItemCount == 0
+                    nextPage += 1
                     _uiState.update {
                         it.copyState(
                             dataList = it.dataList + page.items,
@@ -166,7 +175,7 @@ class LoadableController<T, S : LoadableUiState<T, S>>(
     }
 
     private fun applyRefreshPage(page: Page<T>) {
-        reachEnd = !page.hasMore || page.items.isEmpty()
+        reachEnd = !page.hasMore || page.sourceItemCount == 0
         nextPage = FIRST_PAGE + 1
         _uiState.update {
             it.copyState(
@@ -186,9 +195,24 @@ class LoadableController<T, S : LoadableUiState<T, S>>(
         onError?.invoke(error, isListEmpty)
     }
 
+    /** 全重复页消耗了服务端页码但不结束列表；达到上限后允许从下一未读页手动重试。 */
+    private suspend fun loadNextPageWithNewItems(): Result<Page<T>> {
+        repeat(MAX_PAGES_WITHOUT_NEW_ITEMS) {
+            val result = loadPageSafely(nextPage)
+            val page = result.getOrElse { return result }
+            if (page.items.isNotEmpty() || !page.hasMore || page.sourceItemCount == 0) return result
+            nextPage += 1
+        }
+        return Result.failure(IllegalStateException("连续分页没有新增数据，请手动重试"))
+    }
+
     /** 协程取消原样上抛；loader 意外抛出的异常收敛为 Result.failure。 */
     private suspend fun loadPageSafely(page: Int): Result<Page<T>> = try {
-        loadPage(page)
+        val result = loadPage(page)
+        currentCoroutineContext().ensureActive()
+        val error = result.exceptionOrNull()
+        if (error is CancellationException) throw error
+        result
     } catch (error: CancellationException) {
         throw error
     } catch (error: Exception) {
@@ -198,5 +222,6 @@ class LoadableController<T, S : LoadableUiState<T, S>>(
     companion object {
         /** 页码从 1 开始，feature 的 loader 闭包按同一约定映射到后端参数。 */
         const val FIRST_PAGE = 1
+        private const val MAX_PAGES_WITHOUT_NEW_ITEMS = 3
     }
 }

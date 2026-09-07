@@ -104,6 +104,7 @@ dependencies {
     implementation(project(":core:model"))
     implementation(project(":core:data"))
     implementation(project(":core:design"))
+    implementation(project(":core:player"))
     implementation(project(":feature:home"))
     implementation(project(":feature:browse"))
     implementation(project(":feature:message"))
@@ -125,6 +126,7 @@ dependencies {
     debugImplementation(libs.androidx.compose.ui.tooling)
 
     implementation(libs.hilt.android)
+    implementation(libs.androidx.hilt.navigation.compose)
     ksp(libs.hilt.compiler)
 
     implementation(libs.room.runtime)

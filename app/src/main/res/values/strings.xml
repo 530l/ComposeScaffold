@@ -1,9 +1,30 @@
 <resources>
     <string name="app_name">ComposeScaffold</string>
-    <string name="tab_home">首页</string>
-    <string name="tab_browse">发现</string>
-    <string name="tab_message">消息</string>
-    <string name="tab_cart">购物车</string>
+    <string name="tab_home">发现</string>
+    <string name="tab_browse">视频</string>
+    <string name="tab_message">动态</string>
+    <string name="tab_cart">商城</string>
     <string name="tab_mine">我的</string>
     <string name="press_again_to_exit">再按一次退出</string>
+    <string name="mini_unknown_artist">未知歌手</string>
+    <string name="mini_cover_desc">唱片封面</string>
+    <string name="mini_playlist_title">播放列表</string>
+    <string name="mini_playlist_count">共 %1$d 首歌曲</string>
+    <string name="mini_mode_list_loop">列表循环</string>
+    <string name="mini_mode_single_loop">单曲循环</string>
+    <string name="mini_mode_shuffle">随机播放</string>
+    <string name="mini_clear">清空</string>
+    <string name="mini_seek_rewind">快退 15s</string>
+    <string name="mini_seek_forward">快进 15s</string>
+    <string name="mini_playlist_empty">播放列表为空，快去逛一逛发现好音乐吧</string>
+    <string name="player_queue_count">当前播放（%1$d）</string>
+    <string name="player_list_loop">列表循环</string>
+    <string name="player_single_loop">单曲循环</string>
+    <string name="player_shuffle">随机播放</string>
+    <string name="player_clear_queue">清空</string>
+    <string name="player_rewind">快退 15 秒</string>
+    <string name="player_forward">快进 15 秒</string>
+    <string name="player_queue_empty">播放队列为空</string>
+    <string name="player_remove_track">移除 %1$s</string>
+    <string name="player_unknown_artist">未知歌手</string>
 </resources>

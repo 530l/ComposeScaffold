@@ -19,6 +19,13 @@ android {
     }
 }
 
+// 使用 Variant Sources API，避免旧 SourceSet DSL 与 AGP 9 的类型桥接冲突。
+androidComponents {
+    onVariants(selector().withBuildType("debug")) { variant ->
+        variant.sources.assets?.addStaticSourceDirectory(rootProject.file(".local/feed-assets").absolutePath)
+    }
+}
+
 dependencies {
 
     detektPlugins(libs.detekt.formatting)

@@ -24,3 +24,6 @@ local.properties
 *.ap_
 *.dex
 *.hprof
+
+# Feed 本地采样可能包含短期签名地址，禁止入库。
+.local/

@@ -1,0 +1,362 @@
+[
+  {
+    "workId": "34876121aa7a4424a3ada7fa60f28e7c",
+    "workType": "SONG",
+    "audioUrl": "https://cdn-work.muse.top/work/audio/34876121aa7a4424a3ada7fa60f28e7c.mp3",
+    "imageUrl": "https://cdn-work.muse.top/work/image/34876121aa7a4424a3ada7fa60f28e7c.jpeg",
+    "title": "校门守望",
+    "userName": "浮云游子异乡客",
+    "subType": "normal"
+  },
+  {
+    "workId": "77e5ce73cf1e40feaf2276d823ebc259",
+    "workType": "SONG",
+    "audioUrl": "https://cdn-work.muse.top/work/audio/77e5ce73cf1e40feaf2276d823ebc259.m4a",
+    "imageUrl": "https://cdn-work.muse.top/work/image/77e5ce73cf1e40feaf2276d823ebc259.jpeg",
+    "title": "满江红.写怀",
+    "userName": "菡音",
+    "subType": "normal"
+  },
+  {
+    "workId": "3448bd895ec34ed78d5d720aa042b640",
+    "workType": "MV",
+    "videoUrl": "https://cdn-work.muse.top/work_mv/video/3448bd895ec34ed78d5d720aa042b640_540p.mp4",
+    "imageUrl": "https://cdn-work.muse.top/work_mv/image/3448bd895ec34ed78d5d720aa042b640.jpeg",
+    "orientation": "portrait",
+    "title": "荆楚大地好风光",
+    "userName": "李希林",
+    "subType": "video_lyric_roll"
+  },
+  {
+    "workId": "e9b27168ea994dc28c14d3680d297e97",
+    "workType": "SONG",
+    "audioUrl": "https://cdn-work.muse.top/work/audio/e9b27168ea994dc28c14d3680d297e97.m4a",
+    "imageUrl": "https://cdn-work.muse.top/work/image/e9b27168ea994dc28c14d3680d297e97.jpeg",
+    "title": "Sweet & Cool Dominance",
+    "userName": "黎奥 AW",
+    "subType": "normal"
+  },
+  {
+    "workId": "bdc62427f91c4ce89e995e49c83b47e6",
+    "workType": "SONG",
+    "audioUrl": "https://cdn-work.muse.top/work/audio/bdc62427f91c4ce89e995e49c83b47e6.m4a",
+    "imageUrl": "https://cdn-work.muse.top/work/image/bdc62427f91c4ce89e995e49c83b47e6.jpeg",
+    "title": "厌酒杯",
+    "userName": "无梦与皈",
+    "subType": "normal"
+  },
+  {
+    "workId": "ce6c2b12e4a344d9b2e1b7e7044a5777",
+    "workType": "SONG",
+    "audioUrl": "https://cdn1.muse.top/39aac993-e16b-440c-ae23-14ff8cea9295.mp3",
+    "imageUrl": "https://cdn1.muse.top/b7cfc77e-e877-4a47-87fb-649ee190f832.jpeg",
+    "title": "海风",
+    "userName": "Muse AI官方",
+    "subType": "normal"
+  },
+  {
+    "workId": "69fcf838891e444bb237699e4faa811f",
+    "workType": "SONG",
+    "audioUrl": "https://cdn-work.muse.top/work/audio/69fcf838891e444bb237699e4faa811f.m4a",
+    "imageUrl": "https://cdn-work.muse.top/work/image/69fcf838891e444bb237699e4faa811f.jpeg",
+    "title": "菩提叶上的雪",
+    "userName": "格桑花",
+    "subType": "normal"
+  },
+  {
+    "workId": "8296dbc2d68b45b99af0e7aff9bf6cfd",
+    "workType": "MV",
+    "videoUrl": "https://cdn-work.muse.top/work_mv/video/6c0c5c303e1d4d2fba80cc3ecae0dc91_540p.mp4",
+    "imageUrl": "https://cdn-work.muse.top/work_mv/image/6c0c5c303e1d4d2fba80cc3ecae0dc91.jpeg",
+    "orientation": "9:16",
+    "title": "见路不走",
+    "userName": "坐忘时空",
+    "subType": "mv_aimv"
+  },
+  {
+    "workId": "73cc60e06da044499bb5a16e2821a976",
+    "workType": "SONG",
+    "audioUrl": "https://cdn-work.muse.top/work/audio/73cc60e06da044499bb5a16e2821a976.m4a",
+    "imageUrl": "https://cdn-work.muse.top/work/image/73cc60e06da044499bb5a16e2821a976.jpeg",
+    "title": "三生憾",
+    "userName": "萤火幻想曲造境师",
+    "subType": "normal"
+  },
+  {
+    "workId": "e51fbf1ea178e2f7e876e472296983b5",
+    "workType": "MV",
+    "videoUrl": "https://cdn-work.muse.top/work_mv/video/artist-1780886426206-980644-merge-1780921133832-acb19e73.mp4",
+    "imageUrl": "https://cdn-work.muse.top/work_mv/image/artist-1780886426206-980644-merge-1780921133832-acb19e73.jpeg",
+    "orientation": "portrait",
+    "title": "雨后霓虹慢动作",
+    "userName": "你听电电电电电音吗",
+    "subType": "mv_aimv"
+  },
+  {
+    "workId": "0a571f02fe0849e696c04f356e4c0d9c",
+    "workType": "SONG",
+    "audioUrl": "https://cdn-work.muse.top/work/audio/0a571f02fe0849e696c04f356e4c0d9c.mp3",
+    "imageUrl": "https://cdn-work.muse.top/work/image/0a571f02fe0849e696c04f356e4c0d9c.jpeg",
+    "title": "《捡芝麻到崩溃》",
+    "userName": "不足道哉（白露咏叹曲歌者）",
+    "subType": "normal"
+  },
+  {
+    "workId": "677d058622df5f480a343df48560355c",
+    "workType": "MV",
+    "videoUrl": "https://cdn-work.muse.top/work_mv/video/202606121600059AD59D568D59E181EB34.mp4",
+    "imageUrl": "https://cdn-work.muse.top/work_mv/image/artist-1781082185107-24037/20260611103604638394124B2351581A2A.png",
+    "orientation": "landscape",
+    "title": "誰も知らない衝動",
+    "userName": "你听电电电电电音吗",
+    "subType": "mv_aimv"
+  },
+  {
+    "workId": "16eec61aa2584d93888a5873cec4879c",
+    "workType": "SONG",
+    "audioUrl": "https://cdn-work.muse.top/work/audio/16eec61aa2584d93888a5873cec4879c.mp3",
+    "imageUrl": "https://cdn-work.muse.top/work/image/16eec61aa2584d93888a5873cec4879c.jpeg",
+    "title": "琵琶狂想曲",
+    "userName": "暮色摇篮曲造梦师",
+    "subType": "instrumental"
+  },
+  {
+    "workId": "3c30b3c3504744569a3131b260786b96",
+    "workType": "SONG",
+    "audioUrl": "https://cdn-work.muse.top/work/audio/3c30b3c3504744569a3131b260786b96.mp3",
+    "imageUrl": "https://cdn-work.muse.top/work/image/3c30b3c3504744569a3131b260786b96.jpeg",
+    "title": "Dragon Guardian",
+    "userName": "烟波夜曲守夜人",
+    "subType": "normal"
+  },
+  {
+    "workId": "a12a7f55347c4ffbbf3652953dcd2c05",
+    "workType": "MV",
+    "videoUrl": "https://cdn-work.muse.top/work_mv/video/20260906071804299A9264979CD38DB2D7_540p.mp4",
+    "imageUrl": "https://cdn-media.muse.top/work_mv/image/a12a7f55347c4ffbbf3652953dcd2c05/202609060718041D9C72E420C222A30329.jpg",
+    "orientation": "portrait",
+    "title": "酒水经销卧底",
+    "userName": "萤火幻想曲造境师",
+    "subType": "chat_song"
+  },
+  {
+    "workId": "3c4cd5b7ec0d42688336843082542ee1",
+    "workType": "SONG",
+    "audioUrl": "https://cdn1.muse.top/0f0873a1-dc6b-4bdc-957a-d6609194c742.mp3",
+    "imageUrl": "https://cdn1.muse.top/upload/project_song/song/img/1257745331432022016.jpg",
+    "title": "Digital Mirage",
+    "userName": "Muse AI官方",
+    "subType": "normal"
+  },
+  {
+    "workId": "395dd94f06d24229b429b01ed0e78593",
+    "workType": "SONG",
+    "audioUrl": "https://cdn-work.muse.top/work/audio/395dd94f06d24229b429b01ed0e78593.m4a",
+    "imageUrl": "https://cdn-work.muse.top/work/image/395dd94f06d24229b429b01ed0e78593.jpeg",
+    "title": "我的另一个世界",
+    "userName": "微风一曲",
+    "subType": "normal"
+  },
+  {
+    "workId": "73f54b6d47a64d47b4b7f2f434e50262",
+    "workType": "SONG",
+    "audioUrl": "https://cdn-work.muse.top/work/audio/73f54b6d47a64d47b4b7f2f434e50262.m4a",
+    "imageUrl": "https://cdn1.muse.top/upload/project_song/song/img/1293769455417110528.jpg",
+    "title": "像个老东西",
+    "userName": "麻雀的梦想",
+    "subType": "normal"
+  },
+  {
+    "workId": "1fe7d73c0cd04f36b056300ae85e5c13",
+    "workType": "SONG",
+    "audioUrl": "https://cdn-work.muse.top/work/audio/1fe7d73c0cd04f36b056300ae85e5c13.m4a",
+    "imageUrl": "https://cdn-work.muse.top/work/image/1fe7d73c0cd04f36b056300ae85e5c13.jpeg",
+    "title": "Reborn From Ashes",
+    "userName": "潮音圣宗-蓝海",
+    "subType": "normal"
+  },
+  {
+    "workId": "3044ffb9da114e19bf1cce39d2b225f1",
+    "workType": "SONG",
+    "audioUrl": "https://cdn-work.muse.top/work/audio/3044ffb9da114e19bf1cce39d2b225f1.m4a",
+    "imageUrl": "https://cdn-work.muse.top/work/image/3044ffb9da114e19bf1cce39d2b225f1.jpeg",
+    "title": "Ethereal Step",
+    "userName": "知愈Narrativesoul",
+    "subType": "normal"
+  },
+  {
+    "workId": "2ac3edd770d44ef0b767a7e9b70343ae",
+    "workType": "SONG",
+    "audioUrl": "https://cdn-work.muse.top/work/audio/2ac3edd770d44ef0b767a7e9b70343ae.mp3",
+    "imageUrl": "https://cdn1.muse.top/upload/project_song/song/img/1293335165252349952.jpg",
+    "title": "分寸藏心",
+    "userName": "姚安泉影像文化",
+    "subType": "normal"
+  },
+  {
+    "workId": "5253083d1ead49b7961a40329e880707",
+    "workType": "SONG",
+    "audioUrl": "https://cdn1.muse.top/b85941ef-544f-4a3f-9f6f-884e09929d6a.mp3",
+    "imageUrl": "https://cdn1.muse.top/9c894dd8-7525-41ae-aaca-e5d50ff260f8.jpeg",
+    "title": "长夜无归",
+    "userName": "情意遥看近却无",
+    "subType": "normal"
+  },
+  {
+    "workId": "aaf98b9d22ec4ec49e16ae36a3dbf548",
+    "workType": "SONG",
+    "audioUrl": "https://cdn-work.muse.top/work/audio/aaf98b9d22ec4ec49e16ae36a3dbf548.mp3",
+    "imageUrl": "https://cdn-work.muse.top/work/image/aaf98b9d22ec4ec49e16ae36a3dbf548.jpeg",
+    "title": "霓虹草原",
+    "userName": "冰爷",
+    "subType": "normal"
+  },
+  {
+    "workId": "914e25f9fd424063b1f8a866ece3eb52",
+    "workType": "SONG",
+    "audioUrl": "https://cdn-work.muse.top/work/audio/914e25f9fd424063b1f8a866ece3eb52.mp3",
+    "imageUrl": "https://cdn-work.muse.top/work/image/914e25f9fd424063b1f8a866ece3eb52.jpeg",
+    "title": "其实很寂寞",
+    "userName": "方歌",
+    "subType": "normal"
+  },
+  {
+    "workId": "5f1373a1040f4052840f86c10434288a",
+    "workType": "SONG",
+    "audioUrl": "https://cdn-work.muse.top/work/audio/5f1373a1040f4052840f86c10434288a.mp3",
+    "imageUrl": "https://cdn1.muse.top/upload/project_song/song/img/1292293609932492800.jpg",
+    "title": "风吹草低见牛羊(马头琴呼麦)",
+    "userName": "河風洛塵",
+    "subType": "normal"
+  },
+  {
+    "workId": "548af6583b6f48d382766aab97bd803c",
+    "workType": "SONG",
+    "audioUrl": "https://cdn-work.muse.top/work/audio/548af6583b6f48d382766aab97bd803c.mp3",
+    "imageUrl": "https://cdn-work.muse.top/work/image/548af6583b6f48d382766aab97bd803c.jpeg",
+    "title": "Cherish Present 請好好珍惜現在式的我",
+    "userName": "ZWIND 疯裡浪子",
+    "subType": "normal"
+  },
+  {
+    "workId": "6d1a2329dd3544c686e68692e422e6e6",
+    "workType": "SONG",
+    "audioUrl": "https://cdn-work.muse.top/work/audio/6d1a2329dd3544c686e68692e422e6e6.mp3",
+    "imageUrl": "https://cdn-work.muse.top/work/image/6d1a2329dd3544c686e68692e422e6e6.jpeg",
+    "title": "向前跑",
+    "userName": "雾起摇篮曲造梦师",
+    "subType": "normal"
+  },
+  {
+    "workId": "1346d5a8c04fdca9f6a0e15a4f1e0fe0",
+    "workType": "MV",
+    "videoUrl": "https://cdn-work.muse.top/work_mv/video/26260708001111jid.mp4",
+    "imageUrl": "https://cdn-work.muse.top/work_mv/image/202606111040040E2377BA43A20F128F4B.png",
+    "orientation": "landscape",
+    "title": "Stuck With Me",
+    "userName": "5A写字楼陶喆分喆",
+    "subType": "mv_aimv"
+  },
+  {
+    "workId": "6d4b7d5b8b154022ac46d9301d4d0693",
+    "workType": "SONG",
+    "audioUrl": "https://cdn-work.muse.top/work/audio/6d4b7d5b8b154022ac46d9301d4d0693.m4a",
+    "imageUrl": "https://cdn1.muse.top/upload/project_song/song/img/1293883489856466944.jpg",
+    "title": "爱你在心间",
+    "userName": "流云幻想曲虚数旅人",
+    "subType": "normal"
+  },
+  {
+    "workId": "fd419d89e8dc49ba9052f41114a4c949",
+    "workType": "SONG",
+    "audioUrl": "https://cdn-work.muse.top/work/audio/fd419d89e8dc49ba9052f41114a4c949.m4a",
+    "imageUrl": "https://cdn1.muse.top/upload/project_song/song/img/1293478818276913152.jpg",
+    "title": "那年花开",
+    "userName": "岸明",
+    "subType": "normal"
+  },
+  {
+    "workId": "4d93ab65f8f8c62eb70481abde6b3d46",
+    "workType": "MV",
+    "videoUrl": "https://cdn-work.muse.top/work_mv/video/artist-1779183918880-422003-merge-1779266215135-ceb90298.mp4",
+    "imageUrl": "https://cdn-work.muse.top/work_mv/image/artist-1779183918880-422003-merge-1779266215135-ceb90298.jpeg",
+    "orientation": "landscape",
+    "title": "黄土说书节选",
+    "userName": "5A写字楼陶喆分喆",
+    "subType": "mv_aimv"
+  },
+  {
+    "workId": "cb83e198b18f49ca9b4e6e03b235fba4",
+    "workType": "SONG",
+    "audioUrl": "https://cdn-work.muse.top/work/audio/cb83e198b18f49ca9b4e6e03b235fba4.mp3",
+    "imageUrl": "https://cdn-work.muse.top/work/image/cb83e198b18f49ca9b4e6e03b235fba4.jpeg",
+    "title": "长淮归去辞",
+    "userName": "半荷居",
+    "subType": "normal"
+  },
+  {
+    "workId": "3f08ed309d454fa4874a09ccf7314995",
+    "workType": "MV",
+    "videoUrl": "https://cdn-work.muse.top/work_mv/video/3f08ed309d454fa4874a09ccf7314995_540p.mp4",
+    "imageUrl": "https://cdn-work.muse.top/work_mv/image/3f08ed309d454fa4874a09ccf7314995.jpeg",
+    "orientation": "portrait",
+    "title": "《翡翠雅音.东方雅石专辑》",
+    "userName": "师道雅石（郑洪浩）",
+    "subType": "mv_photo"
+  },
+  {
+    "workId": "f8e705bc8a4f49aa9d5388a0b1152123",
+    "workType": "SONG",
+    "audioUrl": "https://cdn-work.muse.top/work/audio/f8e705bc8a4f49aa9d5388a0b1152123.m4a",
+    "imageUrl": "https://cdn-work.muse.top/work/image/f8e705bc8a4f49aa9d5388a0b1152123.jpeg",
+    "title": "《晨练小调》健康养生宣传歌(十五) 作词 陈广德",
+    "userName": "半笑楼主是医生",
+    "subType": "normal"
+  },
+  {
+    "workId": "c77e0b3c3310a5c46f751e62feda23a6",
+    "workType": "MV",
+    "videoUrl": "https://cdn-work.muse.top/work_mv/video/20260707152312adsad.mp4",
+    "imageUrl": "https://cdn-work.muse.top/work_mv/image/artist-1779078237960-577407/20260519152110B91087047E5C074A91BA.png",
+    "orientation": "landscape",
+    "title": "等你出现",
+    "userName": "喵miumiu",
+    "subType": "mv_aimv"
+  },
+  {
+    "workId": "997463ae51994b8e9dd8a6d92aca0254",
+    "workType": "SONG",
+    "audioUrl": "https://cdn-work.muse.top/work/audio/997463ae51994b8e9dd8a6d92aca0254.mp3",
+    "imageUrl": "https://cdn-work.muse.top/work/image/997463ae51994b8e9dd8a6d92aca0254.jpeg",
+    "title": "天地一呼吸",
+    "userName": "拥有者",
+    "subType": "normal"
+  },
+  {
+    "workId": "bd4434394a084c4a88f06047485d14be",
+    "workType": "SONG",
+    "audioUrl": "https://cdn-work.muse.top/work/audio/bd4434394a084c4a88f06047485d14be.m4a",
+    "imageUrl": "https://cdn1.muse.top/upload/project_song/song/img/1292649352105955328.jpg",
+    "title": "人间余温",
+    "userName": "终于等到你",
+    "subType": "normal"
+  },
+  {
+    "workId": "85a65257fb634b69be6de81f784901ff",
+    "workType": "SONG",
+    "audioUrl": "https://cdn-work.muse.top/work/audio/85a65257fb634b69be6de81f784901ff.m4a",
+    "imageUrl": "https://cdn-work.muse.top/work/image/85a65257fb634b69be6de81f784901ff.jpeg",
+    "title": "青海花儿，老汉大实话",
+    "userName": "昌海",
+    "subType": "normal"
+  },
+  {
+    "workId": "d1990c01ecf541f59a766ff8be4b6c52",
+    "workType": "SONG",
+    "audioUrl": "https://cdn-work.muse.top/work/audio/d1990c01ecf541f59a766ff8be4b6c52.mp3",
+    "imageUrl": "https://cdn-work.muse.top/work/image/d1990c01ecf541f59a766ff8be4b6c52.jpeg",
+    "title": "《土地厨房》健康养生宣传歌(十六) 作词 陈广德",
+    "userName": "半笑楼主是医生",
+    "subType": "normal"
+  }
+]

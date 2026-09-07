@@ -24,4 +24,13 @@ sealed interface LoadMoreState {
  * [hasMore] 必须由调用方根据后端分页信号（cursor 是否为空、总数等）显式给出，
  * 不要用「返回条数 < pageSize」推断，后端不满页返回时会误判。
  */
-data class Page<T>(val items: List<T>, val hasMore: Boolean)
+data class Page<T>(
+    val items: List<T>,
+    val hasMore: Boolean,
+    /** 服务端原始条数；调用方去重或过滤时仍须保留，避免把无新增项误判为末页。 */
+    val sourceItemCount: Int = items.size,
+) {
+    init {
+        require(sourceItemCount >= items.size) { "原始条数不能少于展示条数" }
+    }
+}
