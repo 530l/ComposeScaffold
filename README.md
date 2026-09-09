@@ -102,6 +102,6 @@ CI 在 `.github/workflows/ci.yml`：push/PR 触发，JDK 22（Temurin）+ Gradle
 - 按实际接入的业务 SDK 补齐 R8 规则，并建设签名发布流水线与渠道打包方案。
 - 按发布地区完成第三方许可证、税务、支付、无障碍和合规审查。
 
-「逛」已实现默认混合流，可切换纯音乐和纯 MV；保留五 Tab 导航。数据来源、播放器边界、本地采样配置和未执行的验收场景见 [Feed 实现说明](docs/feed.md)。
+「逛」已实现默认混合流，可切换纯音乐和纯 MV；保留五 Tab 导航。数据来源、播放器边界与验证边界见 [Browse 模块说明](feature/browse/README.md)。
 
 第三方组件及许可证摘要见 [THIRD_PARTY_NOTICES.md](./THIRD_PARTY_NOTICES.md)。

@@ -10,29 +10,33 @@ import androidx.lifecycle.repeatOnLifecycle
 import kotlinx.coroutines.flow.Flow
 
 /**
- * 一次性事件（one-shot event）的标准收集通道。
+ * 在 STARTED 及以上收集 Flow，用最新回调处理导航、提示等副作用。
  *
- * 与 UiState 互补：状态回答"页面现在长什么样"（可重放、幂等，用
- * collectAsStateWithLifecycle 收集）；事件回答"刚刚发生了什么"——导航跳转、
- * toast、snackbar 这类不该被重组或状态恢复重放的信号，由 ViewModel 经
- * Channel/SharedFlow 发射，UI 侧统一用本函数收集。
+ * 低于 STARTED 时取消收集，恢复后重新订阅。是否保留、重放事件由上游 Flow 决定，
+ * 本函数不保证事件不丢失或只处理一次；传入 StateFlow 时，回调需允许重复执行。
  *
- * - 生命周期安全：仅在 [Lifecycle.State.STARTED] 及以上收集，页面不可见时挂起，
- *   回到前台继续；回调取最新组合实例，重组不会丢失在途事件。
- * - Nav3 场景语义：entry 内的 [LocalLifecycleOwner] 是 scene lifecycle，
- *   页面被推入页覆盖时自动暂停收集，底层页面不会偷跑事件。
+ * 使用当前 LocalLifecycleOwner，不额外判断页面是否被覆盖。
+ * 展示状态用 collectAsStateWithLifecycle；播放器释放和滚动同步各自管理生命周期。
  */
 @Composable
 fun <T> ObserveAsEvents(
+    // 要监听的事件流；缓冲与重放规则由发送方决定。
     flow: Flow<T>,
+    // 收到事件后执行的界面操作。
     onEvent: (T) -> Unit,
 ) {
+    // 使用当前页面提供的生命周期。
     val lifecycleOwner = LocalLifecycleOwner.current
+    // 保留最新回调，回调变化时不必重启收集。
     val currentOnEvent by rememberUpdatedState(onEvent)
 
+    // 流或生命周期所属对象变化时重启；离开组合时取消。
     LaunchedEffect(flow, lifecycleOwner) {
+        // 进入 STARTED 后订阅，低于 STARTED 时取消订阅。
         lifecycleOwner.lifecycle.repeatOnLifecycle(Lifecycle.State.STARTED) {
+            // 依次接收上游发出的值。
             flow.collect { event ->
+                // 交给本次重组更新后的回调处理。
                 currentOnEvent(event)
             }
         }

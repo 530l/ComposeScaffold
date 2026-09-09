@@ -22,17 +22,16 @@ internal annotation class MusicPlaybackScope
 @InstallIn(SingletonComponent::class)
 internal abstract class MusicPlayerModule {
 
-    /** 绑定单例音乐控制器实现 */
     @Binds
     @Singleton
     abstract fun bindMusicPlayerController(impl: GlobalMusicPlayer): MusicPlayerController
 
     companion object {
-        /** 提供全局播放器专用进程级协程作用域。 */
         @Provides
         @Singleton
         @MusicPlaybackScope
         fun provideGlobalPlayerScope(): CoroutineScope =
+            // 在主线程串行操作播放器，子任务失败不取消其他任务。
             CoroutineScope(SupervisorJob() + Dispatchers.Main.immediate)
     }
 }
