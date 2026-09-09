@@ -67,7 +67,21 @@ internal fun FeedPagerRoute(
 
     // bind() 仅首次执行，owner 换实例才重绑；闭包引用 latestItems 是关键
     val session = remember(playbackOwner) {
+        /**
+         *          // 1. 页面传入获取最新列表的函数
+         *         // 2. bind 只保存这个函数
+         *         //this.items = items
+         *         //// 3. 以后需要列表时才调用
+         *         //val currentList = this.items()
+         *
+         *     latestItems=    latestItemsState.value
+         */
         playbackOwner.bind(mode) { latestItems }
+        //等价下面写法
+//        playbackOwner.bind(
+//            mode = mode,
+//            items = { latestItems },
+//        )
     }
 
     // Tab 可见 && 恢复完成才起播

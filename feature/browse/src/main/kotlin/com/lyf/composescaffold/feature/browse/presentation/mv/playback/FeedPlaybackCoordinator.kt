@@ -25,7 +25,21 @@ internal class FeedPlaybackCoordinator(
     bufferingDelayMs: Long = 300L, // 短暂缓冲不立即显示加载提示，避免闪烁。
     private val musicController: MusicPlayerController? = null, // 连接全局音乐；未提供时无法播放音乐项。
 ) : FeedPlaybackController {
-    // 播放新音乐时读取当前队列。
+    //
+    /**
+     * 播放新音乐时读取当前队列。 等价于
+     * fun interface MusicQueueProvider {
+     *     fun get(): List<MusicTrack>
+     * }
+     * 等价于
+     * fun getNumber(provider: () -> Int): Int {
+     *     return provider()
+     * }
+     * val result = getNumber {
+     *     100
+     * }
+     * 相当于定义好能力模板，至于这个数据是怎样获取的，交给外面来处理
+     */
     var musicQueueProvider: () -> List<MusicTrack> = { emptyList() }
 
     private val mutableState = MutableStateFlow(FeedPlaybackState())

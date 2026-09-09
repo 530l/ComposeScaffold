@@ -40,17 +40,37 @@ internal class FeedPlaybackViewModel @Inject constructor(
 
     override val outputs = coordinator.outputs
 
-    /** 同模式重新绑定不重置作品；模式切换先保存旧书签。 */
+    /**
+     * 同模式重新绑定不重置作品；模式切换先保存旧书签。
+     */
     fun bind(
         mode: FeedMode,
+
+        /**
+         * //函数类型的参数
+         * fun interface MusicQueueProvider {
+         *     fun get(): List<MusicTrack>
+         * }
+         * 等价于
+         * fun getNumber(provider: () -> Int): Int {
+         *     return provider()
+         * }
+         * val result = getNumber {
+         *     100
+         * }
+         * 相当于定义好能力模板，至于这个数据是怎样获取的，交给外面来处理
+         */
         items: () -> List<FeedItem> = { emptyList() },
     ): FeedPlaybackController {
         // reset 内部会先保存旧模式检查点再清空播放选择。
         if (this.mode != mode) coordinator.reset()
         this.mode = mode
-        this.items = items
+        this.items = items// 保存函数，此时不执行
         // 只把音乐项加入全局音乐队列。
-        coordinator.musicQueueProvider = { this.items().mapNotNull { it.toMusicTrack() } }
+        coordinator.musicQueueProvider = {
+            //调用函数items()
+            this.items().mapNotNull { it.toMusicTrack() }
+        }
         // 返回 this：控制会话就是本 ViewModel，多次 bind 不产生第二个会话。
         return this
     }
