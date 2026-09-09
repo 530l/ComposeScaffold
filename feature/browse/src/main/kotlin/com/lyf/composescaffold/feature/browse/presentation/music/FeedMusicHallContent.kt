@@ -22,8 +22,8 @@ import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -37,13 +37,13 @@ import com.lyf.composescaffold.core.data.repository.FeedInteraction
 import com.lyf.composescaffold.core.design.image.AppImage
 import com.lyf.composescaffold.core.design.ui.loadmore.LoadMoreFooter
 import com.lyf.composescaffold.core.design.ui.loadmore.LoadableLazyColumn
-import com.lyf.composescaffold.core.model.feed.FeedMedia
 import com.lyf.composescaffold.core.model.feed.FeedItem
+import com.lyf.composescaffold.core.model.feed.FeedMedia
 import com.lyf.composescaffold.core.model.music.MusicTrack
 import com.lyf.composescaffold.core.model.music.toMusicTrack
 import com.lyf.composescaffold.feature.browse.R
-import com.lyf.composescaffold.feature.browse.presentation.FeedLyricsDialog
 import com.lyf.composescaffold.feature.browse.presentation.FeedInteractionButtons
+import com.lyf.composescaffold.feature.browse.presentation.FeedLyricsDialog
 import com.lyf.composescaffold.feature.browse.presentation.feedMediaDescription
 import com.lyf.composescaffold.feature.browse.presentation.viewmodel.FeedUiState
 import com.lyf.composescaffold.feature.browse.presentation.viewmodel.MusicHallPlayback
@@ -82,7 +82,10 @@ internal fun FeedMusicHallContent(
         onLoadMore = onLoadMore,
         loadMoreThreshold = 4,
         footerContent = { LoadMoreFooter(it, onRetry = onRetry) },
-        modifier = modifier.fillMaxSize().background(MaterialTheme.colorScheme.background).padding(horizontal = 16.dp),
+        modifier = modifier
+            .fillMaxSize()
+            .background(MaterialTheme.colorScheme.background)
+            .padding(horizontal = 16.dp),
     ) {
         if (featured != null) {
             item(key = "music-banner") {
@@ -127,15 +130,22 @@ private fun MusicHallTrackCard(
     var showLyrics by remember(item.key) { mutableStateOf(false) }
     val selected = item.key == playback.trackId
     Surface(
-        modifier = Modifier.fillMaxWidth().padding(bottom = 10.dp),
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(bottom = 10.dp),
         shape = RoundedCornerShape(20.dp),
         color = if (selected) MaterialTheme.colorScheme.primaryContainer else MaterialTheme.colorScheme.surfaceContainer,
     ) {
         Column(Modifier.padding(12.dp), verticalArrangement = Arrangement.spacedBy(4.dp)) {
-            Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(12.dp),
+            ) {
                 AppImage(
                     item.coverUrl, null,
-                    Modifier.size(56.dp).clip(RoundedCornerShape(12.dp)),
+                    Modifier
+                        .size(56.dp)
+                        .clip(RoundedCornerShape(12.dp)),
                 )
                 Column(Modifier.weight(1f)) {
                     Text(
@@ -159,15 +169,25 @@ private fun MusicHallTrackCard(
                 }
                 IconButton(onClick = onPlay) {
                     if (selected && playback.wantsPlay && !playback.hasError) {
-                        Text(stringResource(R.string.feed_pause), style = MaterialTheme.typography.labelMedium)
+                        Text(
+                            stringResource(R.string.feed_pause),
+                            style = MaterialTheme.typography.labelMedium,
+                        )
                     } else {
-                        Icon(Icons.Default.PlayArrow, stringResource(if (selected && playback.hasError) R.string.feed_retry else R.string.feed_play))
+                        Icon(
+                            Icons.Default.PlayArrow,
+                            stringResource(if (selected && playback.hasError) R.string.feed_retry else R.string.feed_play),
+                        )
                     }
                 }
             }
             FeedInteractionButtons(interaction, busy, onLike, onSave, onRead)
             if ((item.media as? FeedMedia.Music)?.lyrics?.isNotEmpty() == true) {
-                TextButton(onClick = { showLyrics = true }) { Text(stringResource(R.string.feed_lyrics)) }
+                TextButton(
+                    onClick = {
+                        showLyrics = true
+                    },
+                ) { Text(stringResource(R.string.feed_lyrics)) }
             }
         }
     }

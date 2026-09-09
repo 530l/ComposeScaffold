@@ -15,12 +15,12 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.lyf.composescaffold.core.data.repository.FeedInteraction
-import com.lyf.composescaffold.core.model.feed.FeedMedia
 import com.lyf.composescaffold.core.model.feed.FeedItem
+import com.lyf.composescaffold.core.model.feed.FeedMedia
 import com.lyf.composescaffold.core.player.playback.PlaybackProgress
 import com.lyf.composescaffold.feature.browse.R
-import com.lyf.composescaffold.feature.browse.presentation.feedMediaDescription
 import com.lyf.composescaffold.feature.browse.presentation.FeedInteractionButtons
+import com.lyf.composescaffold.feature.browse.presentation.feedMediaDescription
 import com.lyf.composescaffold.feature.browse.presentation.mv.components.FeedPlaybackControls
 import com.lyf.composescaffold.feature.browse.presentation.mv.playback.FeedPlaybackState
 import com.lyf.composescaffold.feature.browse.presentation.mv.playback.PlaybackCommands
@@ -67,7 +67,13 @@ internal fun FeedItemInfo(
             maxLines = 1,
             overflow = TextOverflow.Ellipsis,
         )
-        FeedInteractionButtons(interaction, interactionPending, actions.like, actions.save, actions.read)
+        FeedInteractionButtons(
+            interaction,
+            interactionPending,
+            actions.like,
+            actions.save,
+            actions.read,
+        )
         FeedPlaybackControls(item.key, active, playback.wantsPlay, progress, commands, onScrubbing)
     }
 }

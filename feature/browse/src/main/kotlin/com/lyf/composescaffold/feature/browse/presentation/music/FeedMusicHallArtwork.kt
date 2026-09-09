@@ -32,15 +32,24 @@ internal fun MusicHallBanner(
     modifier: Modifier = Modifier,
 ) {
     val current = track.id == playback.trackId
-    Surface(modifier.fillMaxWidth(), shape = RoundedCornerShape(24.dp), color = MaterialTheme.colorScheme.surfaceContainerHigh) {
+    Surface(
+        modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(24.dp),
+        color = MaterialTheme.colorScheme.surfaceContainerHigh,
+    ) {
         Column(Modifier.padding(20.dp), verticalArrangement = Arrangement.spacedBy(16.dp)) {
             Text(
                 if (current) musicPlaybackLabel(playback) else stringResource(R.string.feed_start_listening),
                 style = MaterialTheme.typography.labelLarge,
                 color = MaterialTheme.colorScheme.primary,
             )
-            Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(16.dp)) {
-                AppImage(track.coverUrl, null, Modifier.size(80.dp).clip(RoundedCornerShape(16.dp)))
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(16.dp),
+            ) {
+                AppImage(track.coverUrl, null, Modifier
+                    .size(80.dp)
+                    .clip(RoundedCornerShape(16.dp)))
                 Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(4.dp)) {
                     Text(
                         track.title.ifBlank { stringResource(R.string.feed_untitled) },
@@ -58,14 +67,16 @@ internal fun MusicHallBanner(
                 }
             }
             Button(onClick = onPlay, modifier = Modifier.fillMaxWidth()) {
-                Text(stringResource(
-                    when {
-                        current && playback.hasError -> R.string.feed_retry
-                        current && playback.wantsPlay -> R.string.feed_pause
-                        current -> R.string.feed_resume_music
-                        else -> R.string.feed_play
-                    },
-                ))
+                Text(
+                    stringResource(
+                        when {
+                            current && playback.hasError -> R.string.feed_retry
+                            current && playback.wantsPlay -> R.string.feed_pause
+                            current -> R.string.feed_resume_music
+                            else -> R.string.feed_play
+                        },
+                    ),
+                )
             }
         }
     }

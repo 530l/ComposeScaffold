@@ -47,7 +47,10 @@ internal fun FeedHeader(
                     Text(
                         stringResource(tab.label),
                         modifier = Modifier.weight(1f).heightIn(min = 48.dp).clip(RoundedCornerShape(12.dp))
-                            .background(if (selected) MaterialTheme.colorScheme.primaryContainer else MaterialTheme.colorScheme.surfaceContainer)
+                            .background(
+                                if (selected) MaterialTheme.colorScheme.primaryContainer
+                                else MaterialTheme.colorScheme.surfaceContainer
+                            )
                             .selectable(selected, role = Role.Tab, onClick = { if (!selected) onMode(tab) })
                             .padding(vertical = 14.dp),
                         textAlign = androidx.compose.ui.text.style.TextAlign.Center,

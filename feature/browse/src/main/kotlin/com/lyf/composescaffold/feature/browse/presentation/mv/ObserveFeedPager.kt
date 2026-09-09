@@ -1,6 +1,5 @@
 package com.lyf.composescaffold.feature.browse.presentation.mv
 
-import com.lyf.composescaffold.feature.browse.presentation.mv.playback.FeedBookmark
 import androidx.compose.foundation.pager.PagerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -12,16 +11,17 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.snapshotFlow
 import com.lyf.composescaffold.core.design.ui.loadmore.LoadMoreState
-import com.lyf.composescaffold.core.model.feed.FeedMode
 import com.lyf.composescaffold.core.model.feed.FeedMedia
+import com.lyf.composescaffold.core.model.feed.FeedMode
+import com.lyf.composescaffold.feature.browse.presentation.mv.playback.FeedBookmark
+import com.lyf.composescaffold.feature.browse.presentation.mv.playback.FeedPlaybackController
+import com.lyf.composescaffold.feature.browse.presentation.mv.playback.FeedPlaybackPolicy
+import com.lyf.composescaffold.feature.browse.presentation.viewmodel.FeedIntent
+import com.lyf.composescaffold.feature.browse.presentation.viewmodel.FeedUiState
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
-import com.lyf.composescaffold.feature.browse.presentation.viewmodel.FeedIntent
-import com.lyf.composescaffold.feature.browse.presentation.viewmodel.FeedUiState
-import com.lyf.composescaffold.feature.browse.presentation.mv.playback.FeedPlaybackController
-import com.lyf.composescaffold.feature.browse.presentation.mv.playback.FeedPlaybackPolicy
 
 /**
  * 监听 Pager 滑屏手势并驱动会话选定与预加载。
@@ -51,9 +51,28 @@ internal fun ObserveFeedPager(
     val pendingMusicKey = remember { mutableStateOf<String?>(null) }
 
     // 全局切歌目标在滚动落定、恢复完成后同步到对应页面。
-    ObserveGlobalMusicSwitch(pager, session, mode, currentState, currentRestoring, pendingMusicKey, onIntent)
+    ObserveGlobalMusicSwitch(
+        pager,
+        session,
+        mode,
+        currentState,
+        currentRestoring,
+        pendingMusicKey,
+        onIntent,
+    )
     // 手势落定驱动选播、预备与提前翻页。
-    ObservePagerSelection(pager, session, policy, mode, currentState, currentRestoring, pendingMusicKey, resume, onResumeConsumed, onIntent)
+    ObservePagerSelection(
+        pager,
+        session,
+        policy,
+        mode,
+        currentState,
+        currentRestoring,
+        pendingMusicKey,
+        resume,
+        onResumeConsumed,
+        onIntent,
+    )
 }
 
 /**
@@ -83,7 +102,13 @@ private fun ObserveGlobalMusicSwitch(
     }
 
     LaunchedEffect(session, pager) {
-        snapshotFlow { Triple(pendingMusicKey.value, pager.isScrollInProgress, currentRestoring.value) }
+        snapshotFlow {
+            Triple(
+                pendingMusicKey.value,
+                pager.isScrollInProgress,
+                currentRestoring.value,
+            )
+        }
             // collectLatest：新一轮切歌到来时取消仍在等待分页的旧查找。
             .collectLatest { (key, scrolling, restoringPage) ->
                 if (key == null || scrolling || restoringPage) return@collectLatest
@@ -91,7 +116,11 @@ private fun ObserveGlobalMusicSwitch(
                 while (index < 0 && currentState.value.loadMoreState != LoadMoreState.End && !currentState.value.failed) {
                     val before = currentState.value
                     // 仅在分页空闲时请求下一页，避免重复请求。
-                    if (before.loadMoreState == LoadMoreState.Idle) onIntent(FeedIntent.LoadMore(mode))
+                    if (before.loadMoreState == LoadMoreState.Idle) onIntent(
+                        FeedIntent.LoadMore(
+                            mode,
+                        ),
+                    )
                     // 挂起等待列表或加载状态发生变化，再重新查找。
                     snapshotFlow { currentState.value }.first { it != before }
                     index = currentState.value.dataList.indexOfFirst { it.key == key }
