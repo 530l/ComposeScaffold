@@ -1,7 +1,7 @@
 package com.lyf.composescaffold.feature.browse.presentation
 
-import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.background
+import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxScope
@@ -51,13 +51,22 @@ internal fun BoxScope.FeedStatusOverlay(
         FeedRecoveryPanel(state, mode, restoring, onIntent, onSkipRestoration)
     }
     Column(
-        Modifier.align(Alignment.TopCenter).fillMaxWidth().padding(horizontal = 16.dp, vertical = 8.dp),
+        Modifier
+            .align(Alignment.TopCenter)
+            .fillMaxWidth()
+            .padding(horizontal = 16.dp, vertical = 8.dp),
         verticalArrangement = Arrangement.spacedBy(8.dp),
     ) {
         if (state.isRefreshing && !blocking) {
-            Row(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalAlignment = Alignment.CenterVertically) {
+            Row(
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
                 CircularProgressIndicator(Modifier.size(16.dp), strokeWidth = 2.dp)
-                Text(stringResource(R.string.feed_refreshing), style = MaterialTheme.typography.labelMedium)
+                Text(
+                    stringResource(R.string.feed_refreshing),
+                    style = MaterialTheme.typography.labelMedium,
+                )
             }
         }
         // 大厅的追加失败由列表 footer 处理，其他请求失败由页面提示处理。
@@ -93,8 +102,15 @@ internal fun BoxScope.FeedStatusOverlay(
                 else -> null
             }
             if (hint != null) {
-                Surface(shape = RoundedCornerShape(12.dp), color = MaterialTheme.colorScheme.surface.copy(alpha = 0.92f)) {
-                    Text(stringResource(hint), Modifier.padding(12.dp), style = MaterialTheme.typography.labelMedium)
+                Surface(
+                    shape = RoundedCornerShape(12.dp),
+                    color = MaterialTheme.colorScheme.surface.copy(alpha = 0.92f),
+                ) {
+                    Text(
+                        stringResource(hint),
+                        Modifier.padding(12.dp),
+                        style = MaterialTheme.typography.labelMedium,
+                    )
                 }
             }
         }
@@ -110,13 +126,17 @@ private fun FeedRecoveryPanel(
     onSkipRestoration: () -> Unit,
 ) {
     Box(
-        Modifier.fillMaxSize().background(MaterialTheme.colorScheme.background)
+        Modifier
+            .fillMaxSize()
+            .background(MaterialTheme.colorScheme.background)
             // 恢复面板拦住空白处点击，不能误触下面的播放和互动按钮。
             .pointerInput(Unit) { detectTapGestures(onTap = {}) },
         contentAlignment = Alignment.Center,
     ) {
         Column(
-            Modifier.verticalScroll(rememberScrollState()).padding(32.dp),
+            Modifier
+                .verticalScroll(rememberScrollState())
+                .padding(32.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.spacedBy(16.dp),
         ) {
@@ -146,7 +166,10 @@ private fun FeedRecoveryPanel(
                 textAlign = TextAlign.Center,
             )
             if (state.failed && !loading) {
-                Text(stringResource(R.string.feed_restore_or_load_failed), color = MaterialTheme.colorScheme.error)
+                Text(
+                    stringResource(R.string.feed_restore_or_load_failed),
+                    color = MaterialTheme.colorScheme.error,
+                )
             }
             if (!loading) {
                 Button(onClick = { onIntent(state.retryIntent(mode)) }) {
@@ -167,8 +190,15 @@ private fun FeedNotice(
     onAction: () -> Unit,
     onDismiss: (() -> Unit)? = null,
 ) {
-    Surface(shape = RoundedCornerShape(16.dp), color = MaterialTheme.colorScheme.surfaceContainerHigh) {
-        Column(Modifier.fillMaxWidth().padding(start = 16.dp, end = 8.dp, top = 12.dp)) {
+    Surface(
+        shape = RoundedCornerShape(16.dp),
+        color = MaterialTheme.colorScheme.surfaceContainerHigh,
+    ) {
+        Column(
+            Modifier
+                .fillMaxWidth()
+                .padding(start = 16.dp, end = 8.dp, top = 12.dp),
+        ) {
             Text(message, style = MaterialTheme.typography.bodyMedium)
             Row(Modifier.align(Alignment.End)) {
                 if (onDismiss != null) {

@@ -97,7 +97,8 @@ internal fun FeedPagerRoute(
     }
     // 两个 ViewModel 互不持有对方，滚动联动、分页与恢复全部在本路由装配。
     ObserveFeedPager(
-        pager, session, playbackOwner.policy, mode, state, restoring, appliedRevision, resume,
+        pager, session, playbackOwner.policy, mode,
+        state, restoring, appliedRevision, resume,
         // 书签用过一次后清空，普通滑动从头播放。
         onResumeConsumed = { resume = FeedBookmark() },
         onIntent = viewModel::onIntent,

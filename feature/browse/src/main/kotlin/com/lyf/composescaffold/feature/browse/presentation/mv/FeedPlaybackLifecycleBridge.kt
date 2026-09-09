@@ -47,7 +47,11 @@ internal fun BindFeedLifecycle(
         }
     }
     // 导航可见性单独变化时也同步播放条件。
-    LaunchedEffect(session, playbackVisible, resumed) { session.setHostVisible(playbackVisible && resumed) }
+    LaunchedEffect(
+        session,
+        playbackVisible,
+        resumed,
+    ) { session.setHostVisible(playbackVisible && resumed) }
     DisposableEffect(view, playback.isPlaying, playbackVisible) {
         // keepScreenOn 需链式保存-还原：记住进入本次绑定前的值。
         val previous = view.keepScreenOn
