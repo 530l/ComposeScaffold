@@ -25,6 +25,7 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TriStateCheckbox
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -41,15 +42,15 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.lyf.composescaffold.core.model.formatMoney
 import com.lyf.composescaffold.core.design.AppTheme
 import com.lyf.composescaffold.core.design.ui.event.ObserveAsEvents
-import com.lyf.composescaffold.core.design.ui.loadmore.LoadableLazyColumn
 import com.lyf.composescaffold.core.design.ui.loadmore.LoadMoreState
+import com.lyf.composescaffold.core.design.ui.loadmore.LoadableLazyColumn
 import com.lyf.composescaffold.core.design.ui.state.LoadableErrorBanner
 import com.lyf.composescaffold.core.design.ui.state.LoadableStateContent
-import com.lyf.composescaffold.feature.cart.R
 import com.lyf.composescaffold.core.model.article.Article
+import com.lyf.composescaffold.core.model.formatMoney
+import com.lyf.composescaffold.feature.cart.R
 
 @Composable
 internal fun CartScreen(
@@ -62,10 +63,20 @@ internal fun CartScreen(
             is CartEvent.Checkout -> onCheckout(event.selectedItemIds)
         }
     }
+    LaunchedEffect(Unit) {
+        val call: Gatt.() -> Unit = {
+            start(1)
+            this.stop()
+        }
+        val gatt = Gatt()
+        gatt.apply(call)
+    }
+
     CartContent(
         uiState = uiState,
         onIntent = viewModel::onIntent,
     )
+
 }
 
 @Composable
@@ -314,11 +325,25 @@ private fun CartContentPreview() {
                 isInitializing = false,
                 dataList = listOf(
                     CartItemUiState(
-                        article = Article(1, "Kotlin 与 Java，不是简单的高低之分", "化骨龙", "广场Tab", "https://example.com/1", "1天前"),
+                        article = Article(
+                            1,
+                            "Kotlin 与 Java，不是简单的高低之分",
+                            "化骨龙",
+                            "广场Tab",
+                            "https://example.com/1",
+                            "1天前",
+                        ),
                         unitPrice = demoUnitPrice(0),
                     ),
                     CartItemUiState(
-                        article = Article(2, "Compose Multiplatform 1.11 发布", "官方", "资讯", "https://example.com/2", "2天前"),
+                        article = Article(
+                            2,
+                            "Compose Multiplatform 1.11 发布",
+                            "官方",
+                            "资讯",
+                            "https://example.com/2",
+                            "2天前",
+                        ),
                         unitPrice = demoUnitPrice(1),
                         selected = true,
                     ),

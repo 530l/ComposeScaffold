@@ -51,6 +51,7 @@ detekt = "1.23.8"
 baselineprofile = "1.4.1"
 profileinstaller = "1.4.1"
 uiautomator = "2.4.0"
+lifecycleRuntimeKtx = "2.11.0"
 
 [libraries]
 # Feed 播放组件统一版本，避免播放器与 Compose 接口漂移。
@@ -122,6 +123,7 @@ junit = { group = "junit", name = "junit", version.ref = "junit" }
 truth = { group = "com.google.truth", name = "truth", version.ref = "truth" }
 androidx-test-ext-junit = { group = "androidx.test.ext", name = "junit", version.ref = "androidxTestExtJunit" }
 androidx-espresso-core = { group = "androidx.test.espresso", name = "espresso-core", version.ref = "espresso" }
+androidx-lifecycle-runtime-ktx = { group = "androidx.lifecycle", name = "lifecycle-runtime-ktx", version.ref = "lifecycleRuntimeKtx" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }
