@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <style name="Theme.Small" parent="android:Theme.Material.Light.NoActionBar" />
+
+    <!-- core-splashscreen 兼容主题：API 31 以下也能获得统一启动屏。 -->
+    <style name="Theme.Small.Splash" parent="Theme.SplashScreen">
+        <item name="windowSplashScreenBackground">@color/app_splash_background</item>
+        <item name="windowSplashScreenAnimatedIcon">@drawable/ic_launcher_foreground</item>
+        <item name="postSplashScreenTheme">@style/Theme.Small</item>
+    </style>
+</resources>

@@ -1,0 +1,37 @@
+# Gradle 与 Kotlin 本地缓存
+/.gradle/
+/.kotlin/
+**/build/
+
+# 本机 Android SDK 配置
+/local.properties
+local.properties
+
+# IDE 与编辑器状态
+/.idea/
+/.vscode/
+/.fleet/
+*.iml
+
+# Android 与 Native 构建产物
+/.externalNativeBuild/
+/.cxx/
+/captures/
+**/release/
+*.apk
+*.aab
+*.ap_
+*.dex
+*.hprof
+
+# 签名、环境变量与服务配置
+.env*
+*.keystore
+*.jks
+keystore.properties
+signing.properties
+google-services.json
+
+# 操作系统文件
+.DS_Store
+Thumbs.db

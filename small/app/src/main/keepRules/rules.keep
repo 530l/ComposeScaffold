@@ -1,0 +1,7 @@
+# AGP 9.3+ 会自动合并此目录中的 .keep 文件，并提供 Android 平台默认优化规则。
+# Retrofit、Hilt、MMKV、Coil 等依赖自身的 consumer rules 继续由 R8 自动合并。
+
+# Retrofit 通过动态代理创建业务 API。限制在 data/*/api，避免使用全项目 keep。
+-keep,allowoptimization,allowobfuscation interface com.lyf.small.data.**.api.** {
+    @retrofit2.http.* <methods>;
+}

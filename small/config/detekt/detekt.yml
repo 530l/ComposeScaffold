@@ -1,0 +1,158 @@
+# detekt 1.23.8 配置（buildUponDefaultConfig = true）。
+# 只覆盖与本项目风格/Compose 场景冲突的规则，其余走默认值。
+build:
+  maxIssues: 0
+
+processors:
+  active: true
+
+console-reports:
+  active: true
+
+comments:
+  active: true
+  CommentOverPrivateFunction:
+    active: false
+  CommentOverPrivateProperty:
+    active: false
+  UndocumentedPublicClass:
+    active: false
+  UndocumentedPublicFunction:
+    active: false
+  UndocumentedPublicProperty:
+    active: false
+
+complexity:
+  active: true
+  # Compose 屏幕/脚手架文件天然偏长，放宽到可商用阈值
+  LongMethod:
+    threshold: 120
+  LongParameterList:
+    functionThreshold: 10
+    constructorThreshold: 9
+    ignoreDefaultParameters: true
+  TooManyFunctions:
+    active: false
+  CyclomaticComplexMethod:
+    threshold: 20
+  NestedBlockDepth:
+    threshold: 6
+  LargeClass:
+    threshold: 800
+
+coroutines:
+  active: true
+
+empty-blocks:
+  active: true
+
+exceptions:
+  active: true
+  TooGenericExceptionCaught:
+    active: false
+  SwallowedException:
+    active: false
+  InstanceOfCheckForException:
+    active: false
+  ThrowingExceptionsWithoutMessageOrCause:
+    active: false
+
+formatting:
+  active: true
+  autoCorrect: false
+  Filename:
+    active: false
+  # 项目统一 4 空格 + 尾随逗号，与 .editorconfig / ktlint 默认差异处覆盖
+  MaximumLineLength:
+    maxLineLength: 140
+  ImportOrdering:
+    active: false
+  TrailingCommaOnCallSite:
+    active: true
+  TrailingCommaOnDeclarationSite:
+    active: true
+  MultiLineIfElse:
+    active: false
+  StringTemplate:
+    active: false
+  CommentWrapping:
+    active: false
+  KdocWrapping:
+    active: false
+  ArgumentListWrapping:
+    maxLineLength: 140
+  ParameterListWrapping:
+    maxLineLength: 140
+  ContextReceiverMapping:
+    active: false
+
+naming:
+  active: true
+  # Compose 习惯：顶层 Val paramName/`functionName` 命名参数
+  FunctionParameterNaming:
+    ignoreAnnotated: ['Composable']
+  FunctionNaming:
+    ignoreAnnotated: ['Composable']
+  TopLevelPropertyNaming:
+    # 允许 SCREAMING_SNAKE 常量与 Compose 惯例的 camelCase / PascalCase 顶层 val
+    constantPattern: '[A-Za-z][A-Za-z0-9_]*'
+  InvalidPackageDeclaration:
+    active: true
+  MatchingDeclarationName:
+    active: false
+
+performance:
+  active: true
+  ForEachOnRange:
+    active: true
+  SpreadOperator:
+    active: false
+
+potential-bugs:
+  active: true
+  EqualsWithHashCodeExist:
+    active: true
+  LateinitUsage:
+    active: false
+  UnsafeCallOnNullableType:
+    active: false
+  HasPlatformType:
+    active: false
+  CastToNullableType:
+    active: false
+
+style:
+  active: true
+  MagicNumber:
+    active: false # Compose dp/sp/颜色值大量字面量，按注释说明意图即可
+  ReturnCount:
+    active: false
+  UnusedPrivateMember:
+    ignoreAnnotated: ['Preview', 'Composable']
+  MaxLineLength:
+    maxLineLength: 140
+    excludePackageStatements: true
+    excludeImportStatements: true
+    excludeCommentStatements: true
+  UnusedImports:
+    active: true
+  WildcardImport:
+    active: false
+  ThrowsCount:
+    active: false
+  LoopWithTooManyJumpStatements:
+    active: false
+  DestructuringDeclarationWithTooManyEntries:
+    active: false
+  UnusedParameter:
+    active: false
+  OptionalUnit:
+    active: false
+  UseCheckOrError:
+    active: false
+  UtilityClassWithPublicConstructor:
+    active: false
+  BracesOnIfStatements:
+    active: false
+  MandatoryBracesLoops:
+    active: false
