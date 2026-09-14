@@ -18,10 +18,26 @@
 # Android 入口与平台反射
 # -----------------------------------------------------------------------------
 
-# Manifest 中的入口通常由 Android 默认规则处理；显式声明可让此文件迁移到其他
-# R8 配置时仍然安全。仅保留类本身，成员仍允许按引用关系优化和裁剪。
--keep class com.lyf.small.app.SmallApplication
--keep class com.lyf.small.app.MainActivity
+# Android 四大组件由系统根据 Manifest、动态注册或框架配置创建：Activity、
+# Service、BroadcastReceiver、ContentProvider。规则限制在应用包内，保留组件类名
+# 和类本身，允许 R8 优化其方法；不会保留组件的全部成员。
+-keep,allowoptimization class com.lyf.small.** extends android.app.Activity {
+    public <init>();
+}
+-keep,allowoptimization class com.lyf.small.** extends android.app.Service {
+    public <init>();
+}
+-keep,allowoptimization class com.lyf.small.** extends android.content.BroadcastReceiver {
+    public <init>();
+}
+-keep,allowoptimization class com.lyf.small.** extends android.content.ContentProvider {
+    public <init>();
+}
+
+# Application 不属于四大组件，但同样由系统按类名创建。
+-keep,allowoptimization class com.lyf.small.** extends android.app.Application {
+    public <init>();
+}
 
 # WebView 通过名称调用 @JavascriptInterface 方法。当前项目尚未使用，规则提前覆盖
 # 后续通用 WebView 组件；不要为整个桥接类保留全部成员。
