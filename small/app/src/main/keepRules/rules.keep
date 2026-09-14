@@ -1,7 +1,127 @@
-# AGP 9.3+ 会自动合并此目录中的 .keep 文件，并提供 Android 平台默认优化规则。
-# Retrofit、Hilt、MMKV、Coil 等依赖自身的 consumer rules 继续由 R8 自动合并。
+# small 公共 R8 规则
+#
+# AGP 9.3+ 会自动合并 Android 默认优化规则、本目录中的所有 .keep 文件，以及
+# 三方依赖发布的 consumer rules。这里保留应用自身的反射边界和跨版本基础规则，
+# 不使用 `-keep class com.lyf.small.** { *; }`，避免关闭代码压缩与成员混淆。
 
-# Retrofit 通过动态代理创建业务 API。限制在 data/*/api，避免使用全项目 keep。
+# -----------------------------------------------------------------------------
+# JVM 元数据
+# -----------------------------------------------------------------------------
+
+# Retrofit、序列化与部分反射 API 需要泛型、嵌套类及运行时注解信息。
+-keepattributes Signature,InnerClasses,EnclosingMethod
+-keepattributes RuntimeVisibleAnnotations,RuntimeInvisibleAnnotations
+-keepattributes RuntimeVisibleParameterAnnotations,RuntimeInvisibleParameterAnnotations
+-keepattributes AnnotationDefault,Exceptions
+
+# -----------------------------------------------------------------------------
+# Android 入口与平台反射
+# -----------------------------------------------------------------------------
+
+# Manifest 中的入口通常由 Android 默认规则处理；显式声明可让此文件迁移到其他
+# R8 配置时仍然安全。仅保留类本身，成员仍允许按引用关系优化和裁剪。
+-keep class com.lyf.small.app.SmallApplication
+-keep class com.lyf.small.app.MainActivity
+
+# WebView 通过名称调用 @JavascriptInterface 方法。当前项目尚未使用，规则提前覆盖
+# 后续通用 WebView 组件；不要为整个桥接类保留全部成员。
+-keepclassmembers,allowoptimization class com.lyf.small.** {
+    @android.webkit.JavascriptInterface <methods>;
+}
+
+# JNI 按符号名称查找 native 方法。这里只约束应用自己声明的 native 边界；
+# C/C++ 反向调用的普通 Java/Kotlin 方法仍需在对应组件旁补充精确规则。
+-keepclasseswithmembernames,includedescriptorclasses class com.lyf.small.** {
+    native <methods>;
+}
+
+# Parcelable 的 CREATOR 可能由平台通过反射读取。
+-keepclassmembers,allowoptimization class com.lyf.small.** implements android.os.Parcelable {
+    public static final android.os.Parcelable$Creator CREATOR;
+}
+
+# Java Serializable 依赖稳定的类名和成员名。当前项目未使用；保留此公共基线，
+# 防止后续系统 Intent、Bundle 或三方 SDK 引入 Java 序列化时仅在 Release 失败。
+-keepnames class com.lyf.small.** implements java.io.Serializable
+-keepclassmembers,allowoptimization class com.lyf.small.** implements java.io.Serializable {
+    static final long serialVersionUID;
+    private static final java.io.ObjectStreamField[] serialPersistentFields;
+    !static !transient <fields>;
+    private void writeObject(java.io.ObjectOutputStream);
+    private void readObject(java.io.ObjectInputStream);
+    java.lang.Object writeReplace();
+    java.lang.Object readResolve();
+}
+
+# 保留 Enum 的标准查找入口，业务枚举本身及未使用成员仍可被裁剪和混淆。
+-keepclassmembers,allowoptimization enum com.lyf.small.** {
+    public static **[] values();
+    public static ** valueOf(java.lang.String);
+}
+
+# -----------------------------------------------------------------------------
+# Retrofit / OkHttp
+# -----------------------------------------------------------------------------
+
+# Retrofit 通过动态代理创建 API。限制在 data/*/api，不保留 Repository、DTO 或
+# 网络实现。Retrofit 3 自带的 consumer rules 还会处理继承接口、Continuation、
+# Response 泛型签名和可选依赖告警。
 -keep,allowoptimization,allowobfuscation interface com.lyf.small.data.**.api.** {
     @retrofit2.http.* <methods>;
 }
+-keepclassmembers,allowshrinking,allowobfuscation interface com.lyf.small.data.**.api.** {
+    @retrofit2.http.* <methods>;
+}
+
+# -----------------------------------------------------------------------------
+# Kotlinx Serialization
+# -----------------------------------------------------------------------------
+
+# 生成的 serializer 由静态引用正常保留。下面覆盖 companion/object serializer
+# 的运行时查找边界；无需保留 DTO 全部类名和字段名。
+-if @kotlinx.serialization.Serializable class **
+-keepclassmembers class <1> {
+    static <1>$* Companion;
+}
+
+-keepnames @kotlinx.serialization.internal.NamedCompanion class *
+-if @kotlinx.serialization.internal.NamedCompanion class *
+-keepclassmembernames class * {
+    static <1> *;
+}
+
+-if @kotlinx.serialization.Serializable class ** {
+    static **$* *;
+}
+-keepclassmembers class <2>$<3> {
+    kotlinx.serialization.KSerializer serializer(...);
+}
+
+-if @kotlinx.serialization.Serializable class ** {
+    public static ** INSTANCE;
+}
+-keepclassmembers class <1> {
+    public static <1> INSTANCE;
+    kotlinx.serialization.KSerializer serializer(...);
+}
+
+# -----------------------------------------------------------------------------
+# Hilt
+# -----------------------------------------------------------------------------
+
+# Hilt 生成代码通过直接引用参与裁剪；这里只保护应用声明的注入入口。Hilt 自带的
+# consumer rules 会继续处理 @EntryPoint 与生成组件的反射转换。
+-keep,allowoptimization,allowobfuscation @dagger.hilt.android.HiltAndroidApp class com.lyf.small.**
+-keep,allowoptimization,allowobfuscation @dagger.hilt.android.AndroidEntryPoint class com.lyf.small.**
+-keep,allowoptimization,allowobfuscation @dagger.hilt.android.lifecycle.HiltViewModel class com.lyf.small.**
+
+# -----------------------------------------------------------------------------
+# 协程、MMKV、Coil
+# -----------------------------------------------------------------------------
+
+# kotlinx-coroutines 会通过 consumer rules 保留 MainDispatcherFactory、
+# CoroutineExceptionHandler、volatile 字段和 Flow 的 GC anchor。
+# MMKV 会通过 consumer rules 保留 native 方法、nativeHandle 与 native 回调。
+# Coil 3 / OkHttp 当前没有应用侧反射模型，因此不需要保留图片、请求或响应对象。
+# 后续若引入按类名加载的插件、自定义 MMKV native 回调或反射式 JSON 框架，必须
+# 按具体包和成员新增规则，不能扩展成全项目 keep。
