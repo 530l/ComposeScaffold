@@ -9,7 +9,6 @@ import com.lyf.small.data.content.model.Article
 import com.lyf.small.data.content.model.ArticlePage
 import com.lyf.small.data.content.repository.ContentRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
@@ -67,13 +66,11 @@ internal class ExploreViewModel @Inject constructor(
         homeJob = viewModelScope.launch {
             coroutineScope {
                 val bannerJob = launch {
-                    repository.loadBanners().fold(
-                        onSuccess = { banners -> updateState { copy(banners = banners) } },
-                        onFailure = { error -> logFailure("首页轮播加载失败", error) },
-                    )
+                    runRequest("首页轮播加载失败") { repository.loadBanners() }
+                        .onSuccess { banners -> updateState { copy(banners = banners) } }
                 }
                 val articleJob = launch {
-                    applyInitialArticles(repository.loadArticles(FIRST_ARTICLE_PAGE))
+                    applyInitialArticles(runRequest("首页文章加载失败") { repository.loadArticles(FIRST_ARTICLE_PAGE) })
                 }
                 joinAll(bannerJob, articleJob)
             }
@@ -111,42 +108,38 @@ internal class ExploreViewModel @Inject constructor(
     }
 
     private suspend fun refreshBanners(): Throwable? =
-        repository.loadBanners().fold(
-            onSuccess = { banners ->
-                updateState { copy(banners = banners) }
+        runRequest("首页轮播刷新失败") { repository.loadBanners() }
+            .fold(
+                onSuccess = { banners ->
+                    updateState { copy(banners = banners) }
+                    null
+                },
+                onFailure = { error -> error },
+            )
+
+    private suspend fun refreshArticles(
+        previousLoadMoreState: ExploreLoadMoreState,
+    ): Throwable? = runRequest("首页文章刷新失败") { repository.loadArticles(FIRST_ARTICLE_PAGE) }
+        .fold(
+            onSuccess = { page ->
+                applyFirstPage(page)
                 null
             },
             onFailure = { error ->
-                logFailure("首页轮播刷新失败", error)
+                updateState {
+                    copy(
+                        hasInitialError = articles.isEmpty(),
+                        loadMoreState = previousLoadMoreState,
+                    )
+                }
                 error
             },
         )
 
-    private suspend fun refreshArticles(
-        previousLoadMoreState: ExploreLoadMoreState,
-    ): Throwable? = repository.loadArticles(FIRST_ARTICLE_PAGE).fold(
-        onSuccess = { page ->
-            applyFirstPage(page)
-            null
-        },
-        onFailure = { error ->
-            logFailure("首页文章刷新失败", error)
-            updateState {
-                copy(
-                    hasInitialError = articles.isEmpty(),
-                    loadMoreState = previousLoadMoreState,
-                )
-            }
-            error
-        },
-    )
-
     private fun applyInitialArticles(result: Result<ArticlePage>) {
         result.fold(
             onSuccess = { page -> applyFirstPage(page) },
-            onFailure = { error ->
-                rethrowCancellation(error)
-                logFailure("首页文章加载失败", error)
+            onFailure = {
                 updateState {
                     copy(
                         isInitializing = false,
@@ -193,7 +186,7 @@ internal class ExploreViewModel @Inject constructor(
         val requestStartedAt = TimeSource.Monotonic.markNow()
         var pageToLoad = nextArticlePage
         repeat(MAX_DUPLICATE_PAGES_PER_REQUEST) {
-            val result = repository.loadArticles(pageToLoad)
+            val result = runRequest("文章分页加载失败") { repository.loadArticles(pageToLoad) }
             currentCoroutineContext().ensureActive()
             result.exceptionOrNull()?.let { error ->
                 handleLoadMoreFailure(
@@ -239,7 +232,6 @@ internal class ExploreViewModel @Inject constructor(
         error: Throwable, failedPage: Int,
         isRetry: Boolean, requestStartedAt: TimeMark,
     ) {
-        rethrowCancellation(error)
         if (isRetry) requestStartedAt.awaitMinimumRetryLoading()
         nextArticlePage = failedPage
         updateState {
@@ -249,7 +241,6 @@ internal class ExploreViewModel @Inject constructor(
                 ),
             )
         }
-        logFailure("文章分页加载失败", error)
     }
 
     /** 断网会立即失败，手动重试时保留短暂加载反馈，避免失败 Footer 闪烁。 */
@@ -263,25 +254,6 @@ internal class ExploreViewModel @Inject constructor(
         any { it.isConnectivityFailure() } -> ExploreEvent.RefreshOffline
         else -> ExploreEvent.RefreshFailed
     }
-
-    private fun logFailure(message: String, error: Throwable) {
-        rethrowCancellation(error)
-        AppLogger.warning(TAG) { "$message: ${error.safeLogSummary()}" }
-    }
-
-    private fun rethrowCancellation(error: Throwable) {
-        if (error is CancellationException) throw error
-    }
-
-    private fun Throwable.safeLogSummary(): String =
-        when (val networkError = (this as? NetworkException)?.error) {
-            is NetworkError.Http -> "HTTP ${networkError.statusCode}"
-            is NetworkError.Api -> "API ${networkError.errorCode}"
-            is NetworkError.Connectivity -> "Connectivity"
-            is NetworkError.InvalidPayload -> "InvalidPayload"
-            is NetworkError.Unknown -> "Unknown"
-            null -> this::class.simpleName ?: "Throwable"
-        }
 
     private fun Throwable.isConnectivityFailure(): Boolean =
         (this as? NetworkException)?.error is NetworkError.Connectivity

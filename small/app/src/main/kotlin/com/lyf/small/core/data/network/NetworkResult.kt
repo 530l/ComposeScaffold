@@ -30,6 +30,15 @@ fun <T> NetworkResult<T>.toResult(): Result<T> = when (this) {
     is NetworkResult.Failure -> Result.failure(NetworkException(error))
 }
 
+/**
+ * 任意异常的脱敏摘要：结构化网络错误取概要，其余只取异常类名。
+ * 响应正文与服务端文案永远不会进入日志，供上层统一记日志使用。
+ */
+fun Throwable.safeLogSummary(): String = when (this) {
+    is NetworkException -> error.logMessage()
+    else -> this::class.simpleName ?: "Throwable"
+}
+
 private fun NetworkError.logMessage(): String = when (this) {
     is NetworkError.Http -> "HTTP $statusCode"
     is NetworkError.Api -> "API errorCode=$errorCode"
