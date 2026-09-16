@@ -39,6 +39,10 @@ fun Throwable.safeLogSummary(): String = when (this) {
     else -> this::class.simpleName ?: "Throwable"
 }
 
+/** 服务端业务错误；非 Api 类错误返回 null。 */
+fun Throwable.apiError(): NetworkError.Api? =
+    (this as? NetworkException)?.error as? NetworkError.Api
+
 private fun NetworkError.logMessage(): String = when (this) {
     is NetworkError.Http -> "HTTP $statusCode"
     is NetworkError.Api -> "API errorCode=$errorCode"

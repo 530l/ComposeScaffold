@@ -22,13 +22,15 @@ internal fun ExploreRouteScene(
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val refreshFailedMessage = stringResource(R.string.feature_explore_refresh_failed)
     val refreshOfflineMessage = stringResource(R.string.feature_explore_refresh_offline)
+    val requireLoginMessage = stringResource(R.string.feature_explore_require_login)
     var message by remember { mutableStateOf<String?>(null) }
 
-    LaunchedEffect(viewModel, refreshFailedMessage, refreshOfflineMessage) {
+    LaunchedEffect(viewModel, refreshFailedMessage, refreshOfflineMessage, requireLoginMessage) {
         viewModel.events.collectLatest { event ->
             message = when (event) {
                 ExploreEvent.RefreshFailed -> refreshFailedMessage
                 ExploreEvent.RefreshOffline -> refreshOfflineMessage
+                ExploreEvent.RequireLogin -> requireLoginMessage
             }
             delay(3_000L.milliseconds)
             message = null

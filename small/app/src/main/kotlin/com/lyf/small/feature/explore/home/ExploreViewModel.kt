@@ -2,21 +2,23 @@ package com.lyf.small.feature.explore.home
 
 import androidx.lifecycle.viewModelScope
 import com.lyf.small.core.common.log.AppLogger
+import com.lyf.small.core.data.network.ApiCodes
 import com.lyf.small.core.data.network.NetworkError
 import com.lyf.small.core.data.network.NetworkException
+import com.lyf.small.core.data.network.apiError
 import com.lyf.small.core.presentation.StateViewModel
 import com.lyf.small.data.content.model.Article
 import com.lyf.small.data.content.model.ArticlePage
+import com.lyf.small.data.content.model.Banner
 import com.lyf.small.data.content.repository.ContentRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Job
-import kotlinx.coroutines.async
-import kotlinx.coroutines.awaitAll
-import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.currentCoroutineContext
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.ensureActive
-import kotlinx.coroutines.joinAll
+import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 import kotlin.time.Duration.Companion.milliseconds
@@ -48,7 +50,7 @@ internal class ExploreViewModel @Inject constructor(
         }
     }
 
-    /** 首次请求并发执行；文章先返回即可结束整页 Loading，轮播失败不阻断正文。 */
+    /** 首次请求并发执行；两个结果都到齐后一次性合并刷新 UI，轮播失败不阻断正文。 */
     private fun initialize() {
         homeJob?.cancel()
         loadMoreJob?.cancel()
@@ -64,16 +66,14 @@ internal class ExploreViewModel @Inject constructor(
             )
         }
         homeJob = viewModelScope.launch {
-            coroutineScope {
-                val bannerJob = launch {
-                    runRequest("首页轮播加载失败") { repository.loadBanners() }
-                        .onSuccess { banners -> updateState { copy(banners = banners) } }
-                }
-                val articleJob = launch {
-                    applyInitialArticles(runRequest("首页文章加载失败") { repository.loadArticles(FIRST_ARTICLE_PAGE) })
-                }
-                joinAll(bannerJob, articleJob)
-            }
+            // 两个请求并行发出，结果到齐后一次性刷新 UI
+            val (bannersResult, articlesResult) = combine(
+                requestFlow("首页轮播加载失败") { repository.loadBanners() },
+                requestFlow("首页文章加载失败") { repository.loadArticles(FIRST_ARTICLE_PAGE) },
+            ) { banners, articles -> banners to articles }.first()
+            // 已取消则不落地，防止迟到结果覆盖新一次加载重置的状态
+            currentCoroutineContext().ensureActive()
+            applyInitialContent(bannersResult, articlesResult)
         }
     }
 
@@ -95,32 +95,38 @@ internal class ExploreViewModel @Inject constructor(
         }
 
         homeJob = viewModelScope.launch {
-            val failures = coroutineScope {
-                listOf(
-                    async { refreshBanners() },
-                    async { refreshArticles(previousLoadMoreState) },
-                ).awaitAll().filterNotNull()
-            }
+            // 两个请求并行发出、各自落地数据，都 settle 后结束刷新动画
+            val failures = combine(
+                flow { emit(refreshBanners()) },
+                flow { emit(refreshArticles(previousLoadMoreState)) },
+            ) { bannerFailure, articleFailure -> listOfNotNull(bannerFailure, articleFailure) }
+                .first()
             currentCoroutineContext().ensureActive()
             updateState { copy(isRefreshing = false) }
             failures.toRefreshEvent()?.let(::emitEvent)
         }
     }
 
-    private suspend fun refreshBanners(): Throwable? =
-        runRequest("首页轮播刷新失败") { repository.loadBanners() }
-            .fold(
-                onSuccess = { banners ->
-                    updateState { copy(banners = banners) }
-                    null
-                },
-                onFailure = { error -> error },
-            )
+    private suspend fun refreshBanners(): Throwable? {
+        val result = runRequest("首页轮播刷新失败") { repository.loadBanners() }
+        // 已取消则不落地，防止迟到结果覆盖新一次加载重置的状态
+        currentCoroutineContext().ensureActive()
+        return result.fold(
+            onSuccess = { banners ->
+                updateState { copy(banners = banners) }
+                null
+            },
+            onFailure = { error -> error },
+        )
+    }
 
     private suspend fun refreshArticles(
         previousLoadMoreState: ExploreLoadMoreState,
-    ): Throwable? = runRequest("首页文章刷新失败") { repository.loadArticles(FIRST_ARTICLE_PAGE) }
-        .fold(
+    ): Throwable? {
+        val result = runRequest("首页文章刷新失败") { repository.loadArticles(FIRST_ARTICLE_PAGE) }
+        // 已取消则不落地，防止迟到结果覆盖新一次加载重置的状态
+        currentCoroutineContext().ensureActive()
+        return result.fold(
             onSuccess = { page ->
                 applyFirstPage(page)
                 null
@@ -135,20 +141,33 @@ internal class ExploreViewModel @Inject constructor(
                 error
             },
         )
+    }
 
-    private fun applyInitialArticles(result: Result<ArticlePage>) {
-        result.fold(
-            onSuccess = { page -> applyFirstPage(page) },
-            onFailure = {
-                updateState {
-                    copy(
-                        isInitializing = false,
-                        hasInitialError = true,
-                        loadMoreState = ExploreLoadMoreState.Idle,
-                    )
-                }
-            },
-        )
+    /** 两个结果一次性落地：轮播失败保留旧图，文章失败进重试态。 */
+    private fun applyInitialContent(
+        bannersResult: Result<List<Banner>>,
+        articlesResult: Result<ArticlePage>,
+    ) {
+        val articlePage = articlesResult.getOrNull()
+        val hasMore = articlePage != null && articlePage.hasMore
+            && articlePage.articles.isNotEmpty()
+
+        nextArticlePage = FIRST_LOAD_MORE_PAGE
+        hasMoreArticles = hasMore
+
+        updateState {
+            copy(
+                banners = bannersResult.getOrNull() ?: banners,
+                articles = articlePage?.articles.orEmpty(),
+                isInitializing = false,
+                hasInitialError = articlePage == null,
+                loadMoreState = when {
+                    articlePage == null -> ExploreLoadMoreState.Idle
+                    hasMore -> ExploreLoadMoreState.Idle
+                    else -> ExploreLoadMoreState.End
+                },
+            )
+        }
     }
 
     private fun applyFirstPage(page: ArticlePage) {
@@ -251,6 +270,7 @@ internal class ExploreViewModel @Inject constructor(
 
     private fun List<Throwable>.toRefreshEvent(): ExploreEvent? = when {
         isEmpty() -> null
+        any { it.apiError()?.errorCode == ApiCodes.TOKEN_EXPIRED } -> ExploreEvent.RequireLogin
         any { it.isConnectivityFailure() } -> ExploreEvent.RefreshOffline
         else -> ExploreEvent.RefreshFailed
     }

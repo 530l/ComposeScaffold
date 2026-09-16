@@ -27,6 +27,7 @@
     <string name="feature_explore_refresh_complete">刷新完成</string>
     <string name="feature_explore_refresh_failed">刷新失败，请稍后再试</string>
     <string name="feature_explore_refresh_offline">网络连接不可用，已保留当前内容</string>
+    <string name="feature_explore_require_login">登录已失效，请重新登录</string>
     <string name="feature_creation_title">AI 创作</string>
     <string name="feature_creation_description">从一个想法开始新的创作</string>
     <string name="feature_assets_title">资产</string>
