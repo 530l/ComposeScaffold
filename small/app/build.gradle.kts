@@ -66,6 +66,9 @@ dependencies {
 
     implementation(libs.coil.compose)
     implementation(libs.coil.network.okhttp)
+    implementation(platform(libs.sandwich.bom))
+    implementation(libs.sandwich)
+    implementation(libs.sandwich.retrofit)
     implementation(libs.retrofit)
     implementation(libs.retrofit.kotlinx.serialization)
     implementation(libs.okhttp)

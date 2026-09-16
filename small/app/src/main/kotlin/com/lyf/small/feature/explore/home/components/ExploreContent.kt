@@ -11,18 +11,19 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import com.lyf.small.R
 import com.lyf.small.core.design.component.refresh.AppPullToRefresh
-import com.lyf.small.feature.explore.home.ExploreIntent
 import com.lyf.small.feature.explore.home.ExploreUiState
 import top.yukonga.miuix.kmp.basic.Scaffold
 import top.yukonga.miuix.kmp.basic.SmallTopAppBar
 import top.yukonga.miuix.kmp.theme.MiuixTheme
 
-/** 探索页组装层:顶栏、刷新容器与一次性提示条;列表内容由 [ExploreList] 提供。 */
+/** 探索页组装层：顶栏、刷新容器与一次性提示条；列表内容由 [ExploreList] 提供。 */
 @Composable
 internal fun ExploreContent(
     uiState: ExploreUiState,
     message: String?,
-    onIntent: (ExploreIntent) -> Unit,
+    onRefresh: () -> Unit,
+    onRetryInitial: () -> Unit,
+    onLoadMore: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     Scaffold(
@@ -40,7 +41,7 @@ internal fun ExploreContent(
         )
         AppPullToRefresh(
             isRefreshing = uiState.isRefreshing,
-            onRefresh = { onIntent(ExploreIntent.Refresh) },
+            onRefresh = onRefresh,
             contentPadding = contentPadding,
             refreshTexts = refreshTexts,
             modifier = Modifier
@@ -50,7 +51,8 @@ internal fun ExploreContent(
             ExploreList(
                 uiState = uiState,
                 contentPadding = contentPadding,
-                onIntent = onIntent,
+                onRetryInitial = onRetryInitial,
+                onLoadMore = onLoadMore,
             )
         }
     }

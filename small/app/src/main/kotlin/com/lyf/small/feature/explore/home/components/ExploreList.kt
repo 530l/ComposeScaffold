@@ -19,26 +19,26 @@ import com.lyf.small.R
 import com.lyf.small.core.design.component.FullPageLoading
 import com.lyf.small.core.design.component.FullPageStateCard
 import com.lyf.small.data.content.model.Article
-import com.lyf.small.feature.explore.home.ExploreIntent
 import com.lyf.small.feature.explore.home.ExploreUiState
 import top.yukonga.miuix.kmp.basic.Text
 import top.yukonga.miuix.kmp.theme.MiuixTheme
 
-/** 探索页列表:按状态切换整页占位或轮播 + 文章流,滚动状态与触底加载收在列表内部。 */
+/** 探索页列表：按整页阶段切换占位或轮播 + 文章流，滚动状态与触底加载收在列表内部。 */
 @Composable
 internal fun ExploreList(
     uiState: ExploreUiState,
     contentPadding: PaddingValues,
-    onIntent: (ExploreIntent) -> Unit,
+    onRetryInitial: () -> Unit,
+    onLoadMore: () -> Unit,
 ) {
     val listState = rememberLazyListState()
     val layoutDirection = LocalLayoutDirection.current
     ExploreLoadMoreEffect(
         listState = listState,
         loadMoreState = uiState.loadMoreState,
-        isInitializing = uiState.isInitializing,
+        isInitializing = uiState.phase == ExploreUiState.Phase.Loading,
         isRefreshing = uiState.isRefreshing,
-        onLoadMore = { onIntent(ExploreIntent.LoadMore) },
+        onLoadMore = onLoadMore,
     )
     LazyColumn(
         state = listState,
@@ -52,62 +52,64 @@ internal fun ExploreList(
         ),
         verticalArrangement = Arrangement.spacedBy(12.dp),
     ) {
-        when {
-            uiState.isInitializing -> item(key = "initial-loading") {
+        when (uiState.phase) {
+            ExploreUiState.Phase.Loading -> item(key = "initial-loading") {
                 FullPageLoading(
                     text = stringResource(R.string.feature_explore_initial_loading),
                     modifier = Modifier.fillParentMaxSize(),
                 )
             }
 
-            uiState.hasInitialError && uiState.articles.isEmpty() -> item(key = "initial-error") {
+            ExploreUiState.Phase.Error -> item(key = "initial-error") {
                 FullPageStateCard(
                     title = stringResource(R.string.feature_explore_initial_error_title),
                     description = stringResource(R.string.feature_explore_initial_error_description),
                     action = stringResource(R.string.feature_explore_retry),
-                    onAction = { onIntent(ExploreIntent.RetryInitial) },
+                    onAction = onRetryInitial,
                     modifier = Modifier.fillParentMaxSize(),
                 )
             }
 
-            uiState.articles.isEmpty() -> item(key = "empty") {
-                FullPageStateCard(
-                    title = stringResource(R.string.feature_explore_empty_title),
-                    description = stringResource(R.string.feature_explore_empty_description),
-                    modifier = Modifier.fillParentMaxSize(),
-                )
-            }
+            ExploreUiState.Phase.Idle -> when {
+                uiState.articles.isEmpty() -> item(key = "empty") {
+                    FullPageStateCard(
+                        title = stringResource(R.string.feature_explore_empty_title),
+                        description = stringResource(R.string.feature_explore_empty_description),
+                        modifier = Modifier.fillParentMaxSize(),
+                    )
+                }
 
-            else -> {
-                if (uiState.banners.isNotEmpty()) {
-                    item(key = "banners") {
-                        ExploreBannerCarousel(banners = uiState.banners)
+                else -> {
+                    if (uiState.banners.isNotEmpty()) {
+                        item(key = "banners") {
+                            ExploreBannerCarousel(banners = uiState.banners)
+                        }
                     }
-                }
-                item(key = "article-title") {
-                    Text(
-                        text = stringResource(R.string.feature_explore_articles_title),
-                        modifier = Modifier.padding(top = 8.dp, start = 4.dp),
-                        fontWeight = FontWeight.SemiBold,
-                        style = MiuixTheme.textStyles.title3,
-                    )
-                }
-                items(
-                    items = uiState.articles,
-                    key = Article::id,
-                ) { article ->
-                    ExploreArticleCard(article = article)
-                }
-                item(key = "load-more-footer") {
-                    ExploreLoadMoreFooter(
-                        state = uiState.loadMoreState,
-                        loadingText = stringResource(R.string.feature_explore_loading_more),
-                        failedText = stringResource(R.string.feature_explore_load_more_failed),
-                        offlineText = stringResource(R.string.feature_explore_load_more_offline),
-                        retryText = stringResource(R.string.feature_explore_retry),
-                        endText = stringResource(R.string.feature_explore_no_more),
-                        onRetry = { onIntent(ExploreIntent.RetryLoadMore) },
-                    )
+                    item(key = "article-title") {
+                        Text(
+                            text = stringResource(R.string.feature_explore_articles_title),
+                            modifier = Modifier.padding(top = 8.dp, start = 4.dp),
+                            fontWeight = FontWeight.SemiBold,
+                            style = MiuixTheme.textStyles.title3,
+                        )
+                    }
+                    items(
+                        items = uiState.articles,
+                        key = Article::id,
+                    ) { article ->
+                        ExploreArticleCard(article = article)
+                    }
+                    item(key = "load-more-footer") {
+                        ExploreLoadMoreFooter(
+                            state = uiState.loadMoreState,
+                            loadingText = stringResource(R.string.feature_explore_loading_more),
+                            failedText = stringResource(R.string.feature_explore_load_more_failed),
+                            offlineText = stringResource(R.string.feature_explore_load_more_offline),
+                            retryText = stringResource(R.string.feature_explore_retry),
+                            endText = stringResource(R.string.feature_explore_no_more),
+                            onRetry = onLoadMore,
+                        )
+                    }
                 }
             }
         }

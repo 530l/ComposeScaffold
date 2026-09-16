@@ -1,6 +1,6 @@
 [versions]
 agp = "9.3.2"
-kotlin = "2.2.10"
+kotlin = "2.4.20"
 ksp = "2.3.11"
 hilt = "2.60.1"
 
@@ -17,6 +17,7 @@ coil = "3.5.0"
 
 retrofit = "3.0.0"
 okhttp = "5.5.0"
+sandwich = "2.4.0"
 kotlinxSerialization = "1.9.0"
 kotlinxCoroutines = "1.11.0"
 
@@ -44,6 +45,9 @@ dots-indicator = { group = "com.tbuonomo", name = "dotsindicator", version.ref =
 coil-compose = { group = "io.coil-kt.coil3", name = "coil-compose", version.ref = "coil" }
 coil-network-okhttp = { group = "io.coil-kt.coil3", name = "coil-network-okhttp", version.ref = "coil" }
 
+sandwich-bom = { group = "com.github.skydoves", name = "sandwich-bom", version.ref = "sandwich" }
+sandwich = { group = "com.github.skydoves", name = "sandwich" }
+sandwich-retrofit = { group = "com.github.skydoves", name = "sandwich-retrofit" }
 retrofit = { group = "com.squareup.retrofit2", name = "retrofit", version.ref = "retrofit" }
 retrofit-kotlinx-serialization = { group = "com.squareup.retrofit2", name = "converter-kotlinx-serialization", version.ref = "retrofit" }
 okhttp = { group = "com.squareup.okhttp3", name = "okhttp", version.ref = "okhttp" }

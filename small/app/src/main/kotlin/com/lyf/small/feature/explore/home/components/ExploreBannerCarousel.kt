@@ -183,12 +183,10 @@ private fun AutoAdvanceBanner(
         touchExplorationEnabled,
         isUserDragging,
     ) {
-        if (
-            pageCount <= 1 ||
-            !lifecycleState.isAtLeast(Lifecycle.State.RESUMED) ||
-            touchExplorationEnabled ||
-            isUserDragging
-        ) {
+        // 自动轮播仅在多页、处于前台且用户未接管（触摸探索/拖动）时进行。
+        val notInteractive = !lifecycleState.isAtLeast(Lifecycle.State.RESUMED)
+        val userControlled = touchExplorationEnabled || isUserDragging
+        if (pageCount <= 1 || notInteractive || userControlled) {
             return@LaunchedEffect
         }
         // 用户按下拖动时 effect 会立即取消；自动动画不会改变 isUserDragging。

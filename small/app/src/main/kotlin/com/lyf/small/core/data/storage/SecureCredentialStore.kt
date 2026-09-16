@@ -36,6 +36,6 @@ interface SecureCredentialStore {
 /**
  * 可由网络和业务调用方识别的存储失败，不得将其当作保存成功或未登录。
  * 刻意不继承 IOException:凭据存储故障不是网络连接问题,
- * 混入 IO 层级会被 safeRequest 误分类为 Connectivity。
+ * 混入 IO 层级会被 Sandwich 异常分类器误判为网络失败。
  */
 class CredentialStorageException(message: String, cause: Throwable? = null) : RuntimeException(message, cause)

@@ -13,7 +13,6 @@ import com.lyf.small.R
 import com.lyf.small.feature.explore.home.components.ExploreContent
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.collectLatest
-import kotlin.time.Duration.Companion.milliseconds
 
 @Composable
 internal fun ExploreRouteScene(
@@ -32,7 +31,7 @@ internal fun ExploreRouteScene(
                 ExploreEvent.RefreshOffline -> refreshOfflineMessage
                 ExploreEvent.RequireLogin -> requireLoginMessage
             }
-            delay(3_000L.milliseconds)
+            delay(3_000L)
             message = null
         }
     }
@@ -40,6 +39,8 @@ internal fun ExploreRouteScene(
     ExploreContent(
         uiState = uiState,
         message = message,
-        onIntent = viewModel::onIntent,
+        onRefresh = viewModel::refresh,
+        onRetryInitial = viewModel::retryInitial,
+        onLoadMore = viewModel::loadMore,
     )
 }

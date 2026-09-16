@@ -2,6 +2,7 @@ package com.lyf.small.core.data.network
 
 import com.lyf.small.core.common.config.AppConfig
 import com.lyf.small.core.common.log.AppLogger
+import com.skydoves.sandwich.retrofit.adapters.ApiResponseCallAdapterFactory
 import kotlinx.serialization.json.Json
 import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.OkHttpClient
@@ -61,4 +62,6 @@ internal fun createRetrofit(
     .baseUrl(config.apiBaseUrl)
     .client(okHttpClient)
     .addConverterFactory(json.asConverterFactory("application/json".toMediaType()))
+    // suspend 接口直接返回 ApiResponse,由 Sandwich 统一分类成功/HTTP 错误/异常。
+    .addCallAdapterFactory(ApiResponseCallAdapterFactory.create())
     .build()
