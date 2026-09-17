@@ -35,6 +35,13 @@ class SessionEventManager @Inject constructor(
         mutableState.value = SessionState.Available
     }
 
+    /** 服务端业务码 -1001（登录失效）时由全局失败 mapper 调用：取出当前凭据走统一失效清理；未存凭据时无会话可失效，静默忽略。 */
+    @Synchronized
+    fun notifyLoginExpired() {
+        val token = credentialStore.getAuthToken() ?: return
+        notifySessionExpired(token)
+    }
+
     /** 旧请求的 401 不能清除后来保存的新 Token；并发失效只清理一次。 */
     @Synchronized
     fun notifySessionExpired(requestToken: String) {

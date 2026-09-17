@@ -1,10 +1,10 @@
 package com.lyf.small.data.content.repository
 
 import com.lyf.small.core.common.log.AppLogger
-import com.lyf.small.data.content.api.WanAndroidApi
-import com.lyf.small.data.content.dto.WanAndroidError
-import com.lyf.small.data.content.dto.WanArticleDto
-import com.lyf.small.data.content.dto.WanBannerDto
+import com.lyf.small.data.content.api.AppApi
+import com.lyf.small.data.content.dto.AppError
+import com.lyf.small.data.content.dto.ArticleDto
+import com.lyf.small.data.content.dto.BannerDto
 import com.lyf.small.data.content.mapper.toModel
 import com.lyf.small.data.content.model.ArticlePage
 import com.lyf.small.data.content.model.Banner
@@ -22,15 +22,15 @@ interface ContentRepository {
     suspend fun loadArticles(page: Int): ApiResponse<ArticlePage>
 }
 
-/** 信封拍平与 DTO 去重映射都在链上完成，失败统一由 ApiResponse 表达、永不抛出。 */
+/** 响应解包与 DTO 去重映射都在链上完成，失败统一由 ApiResponse 表达、永不抛出。 */
 internal class DefaultContentRepository @Inject constructor(
-    private val api: WanAndroidApi,
+    private val api: AppApi,
 ) : ContentRepository {
     override suspend fun loadBanners(): ApiResponse<List<Banner>> =
         api.getBanners()
             .unwrap()
             .mapSuccess {
-                orEmpty().distinctBy(WanBannerDto::id).map(WanBannerDto::toModel)
+                orEmpty().distinctBy(BannerDto::id).map(BannerDto::toModel)
             }
             .onFailure { AppLogger.warning(TAG) { "loadBanners: ${failureSummary()}" } }
 
@@ -41,8 +41,8 @@ internal class DefaultContentRepository @Inject constructor(
                 val dto = this
                 ArticlePage(
                     articles = dto?.datas.orEmpty()
-                        .distinctBy(WanArticleDto::id)
-                        .map(WanArticleDto::toModel),
+                        .distinctBy(ArticleDto::id)
+                        .map(ArticleDto::toModel),
                     hasMore = dto != null && !dto.over && dto.curPage < dto.pageCount,
                 )
             }
@@ -53,14 +53,14 @@ internal class DefaultContentRepository @Inject constructor(
     }
 }
 
-/** 信封业务错误码；仅 WanAndroid 业务失败时非空。 */
-internal fun ApiResponse.Failure<*>.envelopeErrorCode(): Int? =
-    ((this as? ApiResponse.Failure.Error)?.payload as? WanAndroidError)?.code
+/** 服务端业务错误码；仅业务失败时非空。 */
+internal fun ApiResponse.Failure<*>.apiErrorCode(): Int? =
+    ((this as? ApiResponse.Failure.Error)?.payload as? AppError)?.code
 
 /** 日志脱敏摘要：业务错误只记错误码、HTTP 错误只记状态码、异常只记类名；响应正文与服务端文案永不进日志。 */
 internal fun ApiResponse.Failure<*>.failureSummary(): String = when (this) {
     is ApiResponse.Failure.Error -> when (val errorPayload = payload) {
-        is WanAndroidError -> "API errorCode=${errorPayload.code}"
+        is AppError -> "API errorCode=${errorPayload.code}"
         is Response<*> -> "HTTP ${errorPayload.code()}"
         else -> errorPayload?.javaClass?.simpleName ?: "unknown error"
     }

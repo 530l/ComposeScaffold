@@ -81,4 +81,6 @@ dependencies {
     implementation(libs.kermit)
 
     debugImplementation(libs.androidx.compose.ui.tooling)
+
+    testImplementation(libs.junit)
 }

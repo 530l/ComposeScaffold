@@ -7,7 +7,7 @@ import com.lyf.small.core.data.network.isConnectivityFailure
 import com.lyf.small.data.content.model.Article
 import com.lyf.small.data.content.model.ArticlePage
 import com.lyf.small.data.content.repository.ContentRepository
-import com.lyf.small.data.content.repository.envelopeErrorCode
+import com.lyf.small.data.content.repository.apiErrorCode
 import com.skydoves.sandwich.ApiResponse
 import com.skydoves.sandwich.onSuccess
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -72,15 +72,15 @@ internal class ExploreViewModel @Inject constructor(
             // coroutineScope { launch A; launch B }          // 并发 → 等完 → 无结果
             // coroutineScope { async A; async B }.awaitAll() // 并发 → 等完 → 取结果
 
-            //1. coroutineScope 创建 ScopeCoroutine(Job)
-            //2. block 里的 launch/async 成为它的子 Job
-            //3. 父协程在 coroutineScope 处挂起
-            //4. 子 Job 完成时通知 ScopeCoroutine
-            //5. 所有子 Job 完成后，ScopeCoroutine 完成
-            //6. 恢复父协程，继续往下执行
+            // 1. coroutineScope 创建 ScopeCoroutine(Job)
+            // 2. block 里的 launch/async 成为它的子 Job
+            // 3. 父协程在 coroutineScope 处挂起
+            // 4. 子 Job 完成时通知 ScopeCoroutine
+            // 5. 所有子 Job 完成后，ScopeCoroutine 完成
+            // 6. 恢复父协程，继续往下执行
 
-            //创建子 Job → 父协程挂起 → 子 Job 完成回调 → 无子 Job 则完成 → 恢复父协程。
-            //一个错全消，异常上抛；想隔离，用 supervisorScope。
+            // 创建子 Job → 父协程挂起 → 子 Job 完成回调 → 无子 Job 则完成 → 恢复父协程。
+            // 一个错全消，异常上抛；想隔离，用 supervisorScope。
 
             val (bannerRes, articleRes) = coroutineScope {
                 val banners = async { repository.loadBanners() }
@@ -202,7 +202,7 @@ internal class ExploreViewModel @Inject constructor(
     /** 失败到提示的优先级：登录失效 > 网络不可用 > 通用失败。 */
     private fun List<ApiResponse.Failure<*>>.toMessageEvent(): ExploreEvent? = when {
         isEmpty() -> null
-        any { it.envelopeErrorCode() == ApiCodes.TOKEN_EXPIRED } -> ExploreEvent.RequireLogin
+        any { it.apiErrorCode() == ApiCodes.TOKEN_EXPIRED } -> ExploreEvent.RequireLogin
         any { it.isConnectivityFailure() } -> ExploreEvent.RefreshOffline
         else -> ExploreEvent.RefreshFailed
     }
