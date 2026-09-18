@@ -1,4 +1,4 @@
-package com.lyf.small.core.data.storage
+package com.lyf.small.core.infra.storage
 
 import android.content.Context
 import android.content.SharedPreferences

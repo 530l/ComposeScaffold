@@ -1,8 +1,8 @@
-package com.lyf.small.core.data.di
+package com.lyf.small.core.infra.di
 
-import com.lyf.small.core.data.coroutine.DefaultDispatcher
-import com.lyf.small.core.data.coroutine.IoDispatcher
-import com.lyf.small.core.data.coroutine.MainDispatcher
+import com.lyf.small.core.infra.coroutine.DefaultDispatcher
+import com.lyf.small.core.infra.coroutine.IoDispatcher
+import com.lyf.small.core.infra.coroutine.MainDispatcher
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn

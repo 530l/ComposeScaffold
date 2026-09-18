@@ -1,4 +1,4 @@
-package com.lyf.small.core.data.coroutine
+package com.lyf.small.core.infra.coroutine
 
 import javax.inject.Qualifier
 

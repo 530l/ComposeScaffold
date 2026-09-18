@@ -1,5 +1,6 @@
 package com.lyf.small.feature.explore.home.components
 
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -22,7 +23,11 @@ import top.yukonga.miuix.kmp.theme.MiuixTheme
 
 /** 单篇文章卡片:作者行(含「新」徽标)、标题、分类与日期。 */
 @Composable
-internal fun ExploreArticleCard(article: Article) {
+internal fun ExploreArticleCard(
+    article: Article,
+    onClick: () -> Unit = {},
+    modifier: Modifier = Modifier,
+) {
     val author = article.author.ifBlank {
         stringResource(R.string.feature_explore_anonymous_author)
     }
@@ -33,7 +38,9 @@ internal fun ExploreArticleCard(article: Article) {
         colors = CardDefaults.defaultColors(
             color = MiuixTheme.colorScheme.surfaceContainer,
         ),
-        modifier = Modifier.fillMaxWidth(),
+        modifier = modifier
+            .fillMaxWidth()
+            .clickable(onClick = onClick),
         insideMargin = PaddingValues(16.dp),
     ) {
         Row(

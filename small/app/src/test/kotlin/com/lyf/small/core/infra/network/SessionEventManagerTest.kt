@@ -1,7 +1,7 @@
-package com.lyf.small.core.data.network
+package com.lyf.small.core.infra.network
 
-import com.lyf.small.core.data.storage.CredentialStorageException
-import com.lyf.small.core.data.storage.SecureCredentialStore
+import com.lyf.small.core.infra.storage.CredentialStorageException
+import com.lyf.small.core.infra.storage.SecureCredentialStore
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue

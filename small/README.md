@@ -23,9 +23,10 @@ app/src/main/kotlin/com/lyf/small/
 ├── app/                  Application、Activity、组合根与应用级 DI
 ├── core/
 │   ├── common/          配置、日志等通用能力
-│   ├── data/            网络、存储、调度器与数据层 DI
-│   └── design/          Miuix 主题、图片、导航与可复用 UI 组件
+│   ├── design/          Miuix 主题、图片、导航与可复用 UI 组件
+│   └── infra/           网络引擎、存储、调度器与底层基础设施 DI
 ├── data/
+│   ├── auth/            认证与会话数据契约（Token 业务码、登录失效拦截与 DI）
 │   └── content/         文章与轮播的数据契约、模型、API、DTO、映射和 DI
 └── feature/
     ├── explore/         探索页路由、页面状态和 UI
@@ -38,9 +39,9 @@ app/src/main/kotlin/com/lyf/small/
 
 Feature 只向 `app/navigation` 暴露 `NavKey`、`SerializersModule` 和 `EntryProvider`。跨 Feature 跳转继续由应用组合层连接，不在 Feature 内直接持有其他 Feature 的路由。
 
-多个 Feature 可以复用的业务数据按领域放在顶层 `data/`，不归属于任何页面。目前 `data/content` 对外提供 `ContentRepository`、`Article`、`ArticlePage` 和 `Banner`；WanAndroid API、DTO、Mapper 与 Repository 实现保持 `internal`。以后新增账号、创作和资产数据时，分别建立 `data/account`、`data/creation` 和 `data/asset`，不要建立以页面命名的 `data/explore`。
+多个 Feature 可以复用的业务数据按领域放在顶层 `data/`，不归属于任何页面。目前 `data/auth` 收拢登录状态码与全局失效映射，`data/content` 对外提供 `ContentRepository`、`Article`、`ArticlePage` 和 `Banner`；WanAndroid API、DTO、Mapper 与 Repository 实现保持 `internal`。以后新增创作和资产数据时，分别建立 `data/creation` 和 `data/asset`，不要建立以页面命名的 `data/explore`。
 
-网络失败的全链路货币是 Sandwich 的 `ApiResponse`：Retrofit 接口直接返回 `ApiResponse<信封>`，Repository 用 `unwrap()` 拍平信封并以 `mapSuccess` 映射为领域模型，失败以值表达、永不抛异常。`ApiCodes` 与 `ApiResponseExt`（断网/超时判定）位于 `core/data/network`；信封业务码经 `data/content` 的 `envelopeErrorCode()` 提取，页面不接触 DTO。有业务状态的页面使用裸 ViewModel：单一不可变 UiState 经 `update { copy() }` 原子更新，UI 通过公开方法（如 `refresh`/`retryInitial`/`loadMore`）直接驱动；一次性 Event 只承载允许在后台丢失的提示或导航效果，必须持续成立的信息放入 UiState。静态页面不创建无意义的 ViewModel。Feature 的 Route 持有 ViewModel，Content 和区域组件只接收状态与回调；分页、网络错误映射等业务规则仍留在对应 Feature，不进入通用基类。
+网络失败的全链路货币是 Sandwich 的 `ApiResponse`：Retrofit 接口直接返回 `ApiResponse<信封>`，Repository 用 `unwrap()` 拍平信封并以 `mapSuccess` 映射为领域模型，失败以值表达、永不抛异常。`ApiCodes` 位于 `data/auth`，`ApiResponseExt`（断网/超时判定）位于 `core/infra/network`；信封业务码经 `data/content` 的 `envelopeErrorCode()` 提取，页面不接触 DTO。有业务状态的页面使用裸 ViewModel：单一不可变 UiState 经 `update { copy() }` 原子更新，UI 通过公开方法（如 `refresh`/`retryInitial`/`loadMore`）直接驱动；一次性 Event 只承载允许在后台丢失的提示或导航效果，必须持续成立的信息放入 UiState。静态页面不创建无意义的 ViewModel。Feature 的 Route 持有 ViewModel，Content 和区域组件只接收状态与回调；分页、网络错误映射等业务规则仍留在对应 Feature，不进入通用基类。
 
 Explore Feature 只保留导航与展示层。初始化、刷新、分页互斥、去重和错误分层由 `ExploreViewModel` 直接协调，当前规模不增加 Controller、UseCase 或 StateStore。
 

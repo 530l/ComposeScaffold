@@ -11,6 +11,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import com.lyf.small.R
 import com.lyf.small.core.design.component.refresh.AppPullToRefresh
+import com.lyf.small.data.content.model.Article
 import com.lyf.small.feature.explore.home.ExploreUiState
 import top.yukonga.miuix.kmp.basic.Scaffold
 import top.yukonga.miuix.kmp.basic.SmallTopAppBar
@@ -25,6 +26,7 @@ internal fun ExploreContent(
     onRetryInitial: () -> Unit,
     onLoadMore: () -> Unit,
     modifier: Modifier = Modifier,
+    onArticleClick: (Article) -> Unit = {},
 ) {
     Scaffold(
         modifier = modifier.fillMaxSize(),
@@ -53,6 +55,7 @@ internal fun ExploreContent(
                 contentPadding = contentPadding,
                 onRetryInitial = onRetryInitial,
                 onLoadMore = onLoadMore,
+                onArticleClick = onArticleClick,
             )
         }
     }

@@ -1,4 +1,4 @@
-package com.lyf.small.core.data.network
+package com.lyf.small.core.infra.network
 
 import com.lyf.small.core.common.config.AppConfig
 import com.lyf.small.core.common.log.AppLogger

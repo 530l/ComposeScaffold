@@ -5,7 +5,7 @@ import coil3.ImageLoader
 import com.lyf.small.BuildConfig
 import com.lyf.small.core.common.config.AppConfig
 import com.lyf.small.core.common.config.AppEnvironment
-import com.lyf.small.core.data.network.PublicHttpClient
+import com.lyf.small.core.infra.network.PublicHttpClient
 import com.lyf.small.core.design.image.createAppImageLoader
 import dagger.Module
 import dagger.Provides

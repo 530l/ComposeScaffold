@@ -30,6 +30,7 @@ internal fun ExploreList(
     contentPadding: PaddingValues,
     onRetryInitial: () -> Unit,
     onLoadMore: () -> Unit,
+    onArticleClick: (Article) -> Unit = {},
 ) {
     val listState = rememberLazyListState()
     val layoutDirection = LocalLayoutDirection.current
@@ -97,7 +98,10 @@ internal fun ExploreList(
                         items = uiState.articles,
                         key = Article::id,
                     ) { article ->
-                        ExploreArticleCard(article = article)
+                        ExploreArticleCard(
+                            article = article,
+                            onClick = { onArticleClick(article) },
+                        )
                     }
                     item(key = "load-more-footer") {
                         ExploreLoadMoreFooter(

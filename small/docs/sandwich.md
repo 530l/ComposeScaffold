@@ -71,11 +71,11 @@ override suspend fun loadBanners(): ApiResponse<List<Banner>> =
 | 判断 | 落位 | 说明 |
 |---|---|---|
 | `isNetworkFailure` / `isTimeout` | Sandwich（依赖分类器注册） | 断网、超时分别对应 `SandwichNetworkException`、`SandwichTimeoutException` |
-| `isConnectivityFailure()` | `core/data/network/ApiResponseExt.kt` | **断网 ∪ 超时**都按“网络不可用”反馈（产品拍板，保持与旧实现一致的用户可见行为） |
+| `isConnectivityFailure()` | `core/infra/network/ApiResponseExt.kt` | **断网 ∪ 超时**都按“网络不可用”反馈（产品拍板，保持与旧实现一致的用户可见行为） |
 | `envelopeErrorCode()` | `data/content/repository/ContentRepository.kt` | 信封业务码提取，页面只拿 `Int`，不 import DTO |
 | `failureSummary()` | 同上 | 日志白名单脱敏：业务错误只记错误码、HTTP 只记状态码、异常只记类名；`WanAndroidError.toString()` 只输出 code |
 
-业务码常量表 `ApiCodes`（如 `TOKEN_EXPIRED = -1001`）位于 `core/data/network`，按后端文档维护；业务码到页面事件的翻译保留在 ViewModel。
+业务码常量表 `ApiCodes`（如 `TOKEN_EXPIRED = -1001`）位于 `data/auth/ApiCodes.kt`，按后端文档维护；业务码到页面事件的翻译保留在 ViewModel。
 
 ## ViewModel 消费模式
 

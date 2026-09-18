@@ -1,4 +1,4 @@
-package com.lyf.small.core.data.network
+package com.lyf.small.core.infra.network
 
 /**
  * 身份认证 Token 提供者契约。

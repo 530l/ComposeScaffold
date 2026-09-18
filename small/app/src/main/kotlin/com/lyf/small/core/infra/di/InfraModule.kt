@@ -1,19 +1,19 @@
-package com.lyf.small.core.data.di
+package com.lyf.small.core.infra.di
 
 import android.content.Context
 import com.lyf.small.core.common.config.AppConfig
-import com.lyf.small.core.data.network.ApiHttpClient
-import com.lyf.small.core.data.network.PublicHttpClient
-import com.lyf.small.core.data.network.PublicRetrofit
-import com.lyf.small.core.data.network.AuthInterceptor
-import com.lyf.small.core.data.network.SessionEventManager
-import com.lyf.small.core.data.network.createJson
-import com.lyf.small.core.data.network.createOkHttpClient
-import com.lyf.small.core.data.network.createRetrofit
-import com.lyf.small.core.data.storage.AndroidKeyStoreCredentialStore
-import com.lyf.small.core.data.storage.KeyValueStore
-import com.lyf.small.core.data.storage.MmkvKeyValueStore
-import com.lyf.small.core.data.storage.SecureCredentialStore
+import com.lyf.small.core.infra.network.ApiHttpClient
+import com.lyf.small.core.infra.network.PublicHttpClient
+import com.lyf.small.core.infra.network.PublicRetrofit
+import com.lyf.small.core.infra.network.AuthInterceptor
+import com.lyf.small.core.infra.network.SessionEventManager
+import com.lyf.small.core.infra.network.createJson
+import com.lyf.small.core.infra.network.createOkHttpClient
+import com.lyf.small.core.infra.network.createRetrofit
+import com.lyf.small.core.infra.storage.AndroidKeyStoreCredentialStore
+import com.lyf.small.core.infra.storage.KeyValueStore
+import com.lyf.small.core.infra.storage.MmkvKeyValueStore
+import com.lyf.small.core.infra.storage.SecureCredentialStore
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -26,12 +26,12 @@ import retrofit2.Retrofit
 import javax.inject.Singleton
 
 /**
- * 数据基础设施：AppConfig 由 app 组合根从 BuildConfig 提供。
+ * 基础设施：AppConfig 由 app 组合根从 BuildConfig 提供。
  * Hilt 惰性构造：首次注入 KeyValueStore 时才初始化 MMKV，未使用时不增加启动成本。
  */
 @Module
 @InstallIn(SingletonComponent::class)
-object DataModule {
+object InfraModule {
 
     @Provides
     @Singleton

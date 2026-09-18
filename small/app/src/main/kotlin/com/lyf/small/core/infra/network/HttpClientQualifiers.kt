@@ -1,4 +1,4 @@
-package com.lyf.small.core.data.network
+package com.lyf.small.core.infra.network
 
 import javax.inject.Qualifier
 

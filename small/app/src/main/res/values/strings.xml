@@ -34,4 +34,11 @@
     <string name="feature_assets_description">集中管理你的创作资产</string>
     <string name="feature_mine_title">我的</string>
     <string name="feature_mine_description">管理账号与个人设置</string>
+    <string name="press_again_to_exit">再按一次退出应用</string>
+    <string name="feature_explore_detail_title">文章详情</string>
+    <string name="feature_explore_detail_empty_title">详情页面占位</string>
+    <string name="feature_explore_detail_empty_desc">当前为文章详情空白页，已成功接收路由参数</string>
+    <string name="feature_explore_detail_article_id">文章 ID：%1$s</string>
+    <string name="feature_explore_detail_author">作者：%1$s</string>
+    <string name="back">返回</string>
 </resources>

@@ -3,7 +3,7 @@ package com.lyf.small.app
 import android.app.Application
 import android.os.StrictMode
 import com.lyf.small.BuildConfig
-import com.lyf.small.data.content.network.AppLoginExpiredMapper
+import com.lyf.small.data.auth.AppLoginExpiredMapper
 import com.skydoves.sandwich.SandwichInitializer
 import com.skydoves.sandwich.retrofit.exceptions.RetrofitExceptionClassifier
 import dagger.hilt.android.HiltAndroidApp

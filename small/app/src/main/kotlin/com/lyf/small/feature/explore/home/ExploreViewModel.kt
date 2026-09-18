@@ -2,8 +2,8 @@ package com.lyf.small.feature.explore.home
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.lyf.small.core.data.network.ApiCodes
-import com.lyf.small.core.data.network.isConnectivityFailure
+import com.lyf.small.core.infra.network.isConnectivityFailure
+import com.lyf.small.data.auth.ApiCodes
 import com.lyf.small.data.content.model.Article
 import com.lyf.small.data.content.model.ArticlePage
 import com.lyf.small.data.content.repository.ContentRepository

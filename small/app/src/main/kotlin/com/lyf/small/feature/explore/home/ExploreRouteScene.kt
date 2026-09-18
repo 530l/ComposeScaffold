@@ -10,12 +10,14 @@ import androidx.compose.ui.res.stringResource
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.lyf.small.R
+import com.lyf.small.data.content.model.Article
 import com.lyf.small.feature.explore.home.components.ExploreContent
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.collectLatest
 
 @Composable
 internal fun ExploreRouteScene(
+    onArticleClick: (Article) -> Unit = {},
     viewModel: ExploreViewModel = hiltViewModel(),
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
@@ -42,5 +44,6 @@ internal fun ExploreRouteScene(
         onRefresh = viewModel::refresh,
         onRetryInitial = viewModel::retryInitial,
         onLoadMore = viewModel::loadMore,
+        onArticleClick = onArticleClick,
     )
 }

@@ -1,4 +1,4 @@
-package com.lyf.small.core.data.storage
+package com.lyf.small.core.infra.storage
 
 /**
  * 应用统一键值存储接口。

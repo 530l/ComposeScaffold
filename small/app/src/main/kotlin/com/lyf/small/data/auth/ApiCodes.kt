@@ -1,4 +1,4 @@
-package com.lyf.small.core.data.network
+package com.lyf.small.data.auth
 
 /** 服务端约定的业务错误码，按后端文档维护。 */
 object ApiCodes {

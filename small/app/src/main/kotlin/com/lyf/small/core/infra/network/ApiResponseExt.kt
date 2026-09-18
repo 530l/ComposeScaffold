@@ -1,4 +1,4 @@
-package com.lyf.small.core.data.network
+package com.lyf.small.core.infra.network
 
 import com.skydoves.sandwich.ApiResponse
 import com.skydoves.sandwich.exceptions.isNetworkFailure

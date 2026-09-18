@@ -1,4 +1,4 @@
-package com.lyf.small.core.data.storage
+package com.lyf.small.core.infra.storage
 
 /**
  * 敏感凭证专用安全存储接口。

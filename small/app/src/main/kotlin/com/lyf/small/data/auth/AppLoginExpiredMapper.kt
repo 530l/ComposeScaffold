@@ -1,7 +1,6 @@
-package com.lyf.small.data.content.network
+package com.lyf.small.data.auth
 
-import com.lyf.small.core.data.network.ApiCodes
-import com.lyf.small.core.data.network.SessionEventManager
+import com.lyf.small.core.infra.network.SessionEventManager
 import com.lyf.small.data.content.dto.AppError
 import com.skydoves.sandwich.ApiResponse
 import com.skydoves.sandwich.mappers.ApiResponseFailureMapper
