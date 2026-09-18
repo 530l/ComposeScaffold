@@ -1,17 +1,14 @@
 package com.lyf.small.app.navigation
 
-import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.core.tween
-import androidx.compose.animation.fadeIn
-import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import com.lyf.small.core.design.navigation.TabNavHost
+import com.lyf.small.core.design.navigation.TabNavigator
 import com.lyf.small.core.design.navigation.rememberTabNavigator
 import com.lyf.small.feature.assets.navigation.assetsEntryProvider
 import com.lyf.small.feature.assets.navigation.assetsNavigationSerializers
@@ -51,14 +48,16 @@ fun AppNavigation() {
         onNavigateHome = { navigator.switchTab(topLevelTabs.first()) },
     )
 
-    Box(
+    Column(
         modifier = Modifier
             .fillMaxSize()
             .background(MiuixTheme.colorScheme.background),
     ) {
         TabNavHost(
             navigator = navigator,
-            modifier = Modifier.fillMaxSize(),
+            modifier = Modifier
+                .fillMaxWidth()
+                .weight(1f),
         ) {
             exploreEntryProvider(
                 onNavigateToArticle = { article ->
@@ -77,22 +76,26 @@ fun AppNavigation() {
             mineEntryProvider()
         }
 
-        AnimatedVisibility(
-            visible = isTabRoot,
-            enter = fadeIn(animationSpec = tween(180, delayMillis = 260)),
-            exit = fadeOut(animationSpec = tween(120)),
-            modifier = Modifier.align(Alignment.BottomCenter),
-        ) {
-            NavigationBar(
-                items = TopLevelTab.entries.map { tab ->
-                    NavigationItem(
-                        label = stringResource(tab.labelRes),
-                        icon = tab.icon,
-                    )
-                },
-                selected = navigator.currentTabIndex,
-                onClick = { index -> navigator.switchTab(TopLevelTab.entries[index].route) },
-            )
-        }
+        // 底部栏常驻布局位：页面区域到其上沿为止，转场与页面内容永不触及
+        AppTabBar(navigator)
     }
+}
+
+/** 常驻底部 Tab 栏：不参与页面显隐与转场，仅在 Tab 切换时重组。 */
+@Composable
+private fun AppTabBar(
+    navigator: TabNavigator,
+    modifier: Modifier = Modifier,
+) {
+    NavigationBar(
+        items = TopLevelTab.entries.map { tab ->
+            NavigationItem(
+                label = stringResource(tab.labelRes),
+                icon = tab.icon,
+            )
+        },
+        selected = navigator.currentTabIndex,
+        onClick = { index -> navigator.switchTab(TopLevelTab.entries[index].route) },
+        modifier = modifier,
+    )
 }

@@ -7,9 +7,6 @@ import androidx.compose.animation.core.tween
 import androidx.compose.animation.slideInHorizontally
 import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.animation.togetherWith
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableIntState
 import androidx.compose.runtime.Stable
@@ -18,9 +15,7 @@ import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.IntOffset
-import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.navigation3.rememberViewModelStoreNavEntryDecorator
 import androidx.navigation3.runtime.EntryProviderScope
 import androidx.navigation3.runtime.NavBackStack
@@ -128,13 +123,10 @@ private fun exitTransition(): ContentTransform = slideInHorizontally(
 )
 
 /** Navigation 3 页面容器；Feature 只注册路由入口，不直接操作其他 Feature 的返回栈。 */
-public val TabBarHeight: Dp = 80.dp
-
 @Composable
 fun TabNavHost(
     navigator: TabNavigator,
     modifier: Modifier = Modifier,
-    tabBarHeight: Dp = TabBarHeight,
     entryProvider: EntryProviderScope<NavKey>.(navigator: TabNavigator) -> Unit,
 ) {
     val baseProvider = navigationEntryProvider {
@@ -142,23 +134,12 @@ fun TabNavHost(
     }
     val stableEntryProvider: (NavKey) -> NavEntry<NavKey> = { route ->
         val entry = baseProvider(route)
-        val isTabRoot = route in navigator.tabs
         NavEntry(
             key = route,
             contentKey = route.toString(),
             metadata = entry.metadata,
         ) {
-            Box(
-                modifier = if (isTabRoot) {
-                    Modifier
-                        .fillMaxSize()
-                        .padding(bottom = tabBarHeight)
-                } else {
-                    Modifier.fillMaxSize()
-                },
-            ) {
-                entry.Content()
-            }
+            entry.Content()
         }
     }
     val decoratedEntries = navigator.tabs.map { tab ->
