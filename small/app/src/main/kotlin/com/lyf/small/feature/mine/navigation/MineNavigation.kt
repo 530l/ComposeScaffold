@@ -20,8 +20,10 @@ val mineNavigationSerializers = SerializersModule {
     }
 }
 
-fun EntryProviderScope<NavKey>.mineEntryProvider() {
+fun EntryProviderScope<NavKey>.mineEntryProvider(
+    onNavigateToLogin: () -> Unit,
+) {
     entry<MineRoute> {
-        MineRouteScene()
+        MineRouteScene(onNavigateToLogin = onNavigateToLogin)
     }
 }

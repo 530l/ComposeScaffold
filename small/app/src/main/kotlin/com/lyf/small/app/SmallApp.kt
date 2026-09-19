@@ -2,7 +2,7 @@ package com.lyf.small.app
 
 import androidx.compose.runtime.Composable
 import coil3.ImageLoader
-import com.lyf.small.app.navigation.AppNavigation
+import com.lyf.small.app.navigation.AppRootNavigation
 import com.lyf.small.core.design.image.ProvideAppImageLoader
 import com.lyf.small.core.design.theme.AppTheme
 
@@ -11,7 +11,7 @@ import com.lyf.small.core.design.theme.AppTheme
 fun SmallApp(imageLoader: ImageLoader) {
     AppTheme {
         ProvideAppImageLoader(imageLoader = imageLoader) {
-            AppNavigation()
+            AppRootNavigation()
         }
     }
 }

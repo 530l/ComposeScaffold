@@ -1,11 +1,7 @@
 package com.lyf.small.core.design.navigation
 
-import androidx.compose.animation.ContentTransform
 import androidx.compose.animation.EnterTransition
 import androidx.compose.animation.ExitTransition
-import androidx.compose.animation.core.tween
-import androidx.compose.animation.slideInHorizontally
-import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.animation.togetherWith
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableIntState
@@ -15,7 +11,6 @@ import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.unit.IntOffset
 import androidx.lifecycle.viewmodel.navigation3.rememberViewModelStoreNavEntryDecorator
 import androidx.navigation3.runtime.EntryProviderScope
 import androidx.navigation3.runtime.NavBackStack
@@ -98,30 +93,6 @@ fun rememberTabNavigator(
     return remember(tabs) { TabNavigator(tabs, stacks, currentIndex, reselectEvents) }
 }
 
-/** 转场时长：推入与退出共用，保证按钮、手势两种关闭路径节奏一致（参考 chengdongqing/WeChat）。 */
-private const val TRANSITION_DURATION_MILLISECOND = 300
-private val TRANSITION_ANIMATION_SPEC = tween<IntOffset>(
-    durationMillis = TRANSITION_DURATION_MILLISECOND,
-)
-
-/** 推入转场：新页面从右侧全宽滑入，底层页面全宽滑出。 */
-private fun enterTransition(): ContentTransform = slideInHorizontally(
-    initialOffsetX = { it },
-    animationSpec = TRANSITION_ANIMATION_SPEC,
-) togetherWith slideOutHorizontally(
-    targetOffsetX = { -it },
-    animationSpec = TRANSITION_ANIMATION_SPEC,
-)
-
-/** 退出转场：底层页面从左侧全宽复位，当前页面全宽滑出；按钮关闭与侧滑关闭共用同一实现。 */
-private fun exitTransition(): ContentTransform = slideInHorizontally(
-    initialOffsetX = { -it },
-    animationSpec = TRANSITION_ANIMATION_SPEC,
-) togetherWith slideOutHorizontally(
-    targetOffsetX = { it },
-    animationSpec = TRANSITION_ANIMATION_SPEC,
-)
-
 /** Navigation 3 页面容器；Feature 只注册路由入口，不直接操作其他 Feature 的返回栈。 */
 @Composable
 fun TabNavHost(
@@ -173,10 +144,10 @@ fun TabNavHost(
                 // 顶层 Tab 之间是直接切换，不属于页面导航，不播放转场动画
                 EnterTransition.None togetherWith ExitTransition.None
             } else {
-                enterTransition()
+                horizontalPushTransition()
             }
         },
-        popTransitionSpec = { exitTransition() },
-        predictivePopTransitionSpec = { exitTransition() },
+        popTransitionSpec = { horizontalPopTransition() },
+        predictivePopTransitionSpec = { horizontalPopTransition() },
     )
 }

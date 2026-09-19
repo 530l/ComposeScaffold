@@ -26,15 +26,15 @@ import top.yukonga.miuix.kmp.theme.MiuixTheme
 
 private val topLevelTabs = TopLevelTab.entries.map { it.route }
 
-private val navigationSerializers =
+internal val navigationSerializers =
     exploreNavigationSerializers +
         creationNavigationSerializers +
         assetsNavigationSerializers +
         mineNavigationSerializers
 
-/** 组合四个 Feature 的顶层路由与 Miuix 底部导航。 */
+/** 组合四个 Feature 的顶层路由与 Miuix 底部导航；账号流程经 [onNavigateToLogin] 上抛到 App 级路由。 */
 @Composable
-fun AppNavigation() {
+fun AppNavigation(onNavigateToLogin: () -> Unit) {
     val navigator = rememberTabNavigator(
         tabs = topLevelTabs,
         serializersModule = navigationSerializers,
@@ -73,7 +73,7 @@ fun AppNavigation() {
             )
             creationEntryProvider()
             assetsEntryProvider()
-            mineEntryProvider()
+            mineEntryProvider(onNavigateToLogin)
         }
 
         // 底部栏常驻布局位：页面区域到其上沿为止，转场与页面内容永不触及
